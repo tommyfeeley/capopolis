@@ -1,0 +1,650 @@
+{% load humanize cap_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ team.city }} {{ team.name }} - Capopolis</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+        }
+
+        a {
+            color: #6eb5ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .cap-summary {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cap-box {
+            background-color: #252542;
+
+            padding: 25px 40px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .cap-box .label {
+            color: #888;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .cap-box .value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            
+        }
+
+        .cap-box.space .value {
+            color: #4ade80;
+        }
+        .cap-box.ltir .value {
+            color: #fbbf24;
+        }
+
+        .position-group {
+            margin-bottom: 40px;
+        }
+
+        .position-header {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #444;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #252542;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1a1a2e;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        th.season-col {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        th.season-col span {
+            display: block;
+            color: #888;
+            font-weight: normal;
+            margin-bottom: 3px;
+        }
+
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #1a1a2e;
+        }
+
+        .player-name {
+            font-weight: 500;
+        }
+
+        .position {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .money {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .money.empty {
+            color: #444;
+        }
+
+        .money.ltir {
+            color: #fbbf24;
+        }
+
+        .money.ir {
+            color: #a78bfa;
+        }
+        .money.buried {
+            color: #a78bfa;
+        }
+
+        .expiry {
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .expiry-ufa {
+            color: #f87171;
+        }
+
+        .expiry-rfa {
+            color: #60a5fa
+        }
+
+        .season-total {
+            font-weight: bold;
+            background-color: #1a1a2e;
+        }
+
+        .season-link {
+            font-size: 0.7rem;
+            display: block;
+            margin-top: 3px;
+        }
+
+                .view-options {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .current-view {
+            color: #888;
+            font-size: 0.9rem;
+            padding: 8px 15px;
+            background-color: #252542;
+            border-radius: 5px;
+        }
+        
+        .season-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .season-selector label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .season-selector select {
+            background-color: #252542;
+            color: #eee;
+            border: 1px solid #444;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        .season-selector select:hover {
+            border-color: #666;
+        }
+
+                .cap-bar {
+            background-color: #252542;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 40px;
+        }
+        
+        .cap-bar-labels-top {
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cap-bar-visual {
+            height: 35px;
+            background-color: #1a1a2e;
+            border: 6px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .cap-bar-active {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .cap-bar-ltir {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .cap-bar-space {
+            background: linear-gradient(90deg, #059669, #10b981);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .cap-bar-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border: 3px;
+        }
+
+
+        .legend-color.active {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+
+        .legend-color.ltir {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .legend-color.space {
+            background: linear-gradient(90deg, #059669, #10b981);
+        }
+
+        .legend-label {
+            color: #ccc;
+        }
+
+        .legend-item.ceiling {
+            margin-left: auto;
+            color: #888;
+        }
+
+    </style>
+
+</head>
+<body>
+    <a href="{% url 'home' %}" class="back-link">← All Teams</a>
+
+    <header>
+        <h1>{{team.city}} {{team.name}}</h1>
+
+        <div class="view-options">
+            <span class="current-view">Multi-Season Overview</span>
+            <div class="season-selector">
+                <label for="season-select">Jump to season:</label>
+                <select id="season-select" onchange="goToSeason(this.value)">
+                    <option value="">
+                        Select Season:
+                    </option>
+                    {% for season in display_seasons %}
+                    <option value="{{ season }}">{{ season }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="cap-summary">
+            <div class="cap-box">
+                <div class="label">Cap Ceiling</div>
+                <div class="value">${{ cap_ceiling|intcomma }}</div>
+            </div>
+            <div class="cap-box">
+                <div class="label">Current Cap</div>
+                <div class="value">${{ current_cap|intcomma }}</div>
+            </div>
+            <div class="cap-box ltir">
+                <div class="label">LTIR Pool</div>
+                <div class="value">${{ ltir_pool|intcomma }}</div>
+            </div>
+            <div class="cap-box space">
+                <div class="label">Cap Space</div>
+                <div class="value">${{ cap_space|intcomma }}</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="cap-bar">
+        <div class="cap-bar-labels-top">
+            <span>Cap Breakdown</span>
+        </div>
+        <div class="cap-bar-visual">
+            <div class="cap-bar-active" style="width: {{ active_cap_pct }}%;" title="Active Cap: ${{ active_cap|intcomma }}">
+            </div>
+            {% if ltir_pct > 0 %}
+            <div class="cap-bar-ltir" style="width: {{ ltir_pct }}%;" title="LTIR: ${{ ltir_pool|intcomma }}">
+            </div>
+            {% endif %}
+            <div class="cap-bar-space" style="width: {{ space_pct }}%;" title="Cap Space: ${{ cap_space|intcomma }}">
+            </div>
+        </div>
+        <div class="cap-bar-legend">
+            <div class="legend-item">
+                <span class="legend-color active"></span>
+                <span class="legend-label">Active Cap: ${{ active_cap|intcomma }}</span>
+            </div>
+            {% if ltir_pool > 0 %}
+            <div class="legend-item">
+                <span class="legend-color ltir"></span>
+                <span class="legend-label">LTIR: ${{ ltir_pool|intcomma }}</span>
+            </div>
+            {% endif %}
+            <div class="legend-item">
+                <span class="legend-color space"></span>
+                <span class="legend-label">Cap Space: ${{ cap_space|intcomma }}</span>
+            </div>
+            <div class="legend-item ceiling">
+                <span class="legend-label">Ceiling: ${{ cap_ceiling|intcomma }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-group">
+        <h2 class="position-header">Forwards</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Pos</th>
+                    {% for season in display_seasons %}
+                    <th class="season-col">
+                        <span>CAP HIT</span>
+                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
+                        
+                    </th>
+                    {% endfor %}
+                    <th style="text-align: center;">Expiry</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in forwards %}
+                <tr>
+                    <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
+                    <td class="position">{{ row.player.position }}</td>
+
+                    {% for season in display_seasons %}
+                    {% with season_data=row.seasons|get_item:season %}
+                    <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
+                        {% if season_data %}
+                            ${{ season_data.effective_cap_hit|intcomma }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+
+                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
+                        {% if row.contract_end %}
+                            {{ row.free_agent_type}} {{row.contract_end}}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{{ display_seasons|length|add:3 }}">No forwards</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="position-group">
+        <h2 class="position-header">Defensemen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Pos</th>
+                    {% for season in display_seasons %}
+                    <th class="season-col">
+                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
+                        <span>Cap Hit</span>
+                    </th>
+                    {% endfor %}
+                    <th style="text-align: center;">Expiry</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in defensemen %}
+                <tr>
+                    <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
+                    <td class="position">{{ row.player.position }}</td>
+
+                    {% for season in display_seasons %}
+                    {% with season_data=row.seasons|get_item:season %}
+                    <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
+                        {% if season_data %}
+                            ${{ season_data.effective_cap_hit|intcomma }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+
+                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
+                        {% if row.contract_end %}
+                            {{ row.free_agent_type}} {{row.contract_end}}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{{ display_seasons|length|add:3 }}">No defensemen</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="position-group">
+        <h2 class="position-header">Goalies</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Pos</th>
+                    {% for season in display_seasons %}
+                    <th class="season-col">
+                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
+                        <span>Cap Hit</span>
+                    </th>
+                    {% endfor %}
+                    <th style="text-align: center;">Expiry</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in goalies %}
+                <tr>
+                    <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
+                    <td class="position">{{ row.player.position }}</td>
+
+                    {% for season in display_seasons %}
+                    {% with season_data=row.seasons|get_item:season %}
+                    <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
+                        {% if season_data %}
+                            ${{ season_data.effective_cap_hit|intcomma }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+
+                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
+                        {% if row.contract_end %}
+                            {{ row.free_agent_type}} {{row.contract_end}}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{{ display_seasons|length|add:3 }}">No goalies</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% if retained_contracts %}
+    <div class="position-group">
+        <h2 class="position-header">Retained Salary</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Player</th>
+                <th>Current Team</th>
+                <th>Retained</th>
+                <th>%</th>
+                <th>Until</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for row in retained_contracts %}
+                <tr>
+                    <td class="player-name">{{ row.player.first_name }} {{ row.player.last_name }}</td>
+                    <td>{{ row.current_team.abbreviation }}</td>
+                    <td class="money">${{ row.retained_amount|intcomma }}</td>
+                    <td>{{ row.retention_percentage }}</td>
+                    <td>{{ row.contract_end }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+
+    {% if bought_out_contracts %}
+    <div class="position-group">
+        <h2 class="position-header">Bought Out Contracts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th></th>
+                    {% for season in display_seasons %}
+                    <th class="season-col">{{ season }}</th>
+                    {% endfor %}
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in bought_out_contracts %}
+                <tr>
+                    <td class="player-name">{{ row.player.first_name}} {{ row.player.last_name }}</td>
+                    <td></td>
+                    {% for season in display_seasons %}
+                    <td class="money {% if not row.seasons|get_item:season %} empty {% endif %}">
+                        {% with cap_hit=row.seasons|get_item:season %}
+                            {% if cap_hit %}
+                                ${{ cap_hit|intcomma }}
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td></td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="position-group">
+        <h2 class="position-header">Season Totals</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    {% for season in display_seasons %}
+                    <th class="season-col">{{ season }}</th>
+                    {% endfor %}
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="season-total">
+                    <td colspan="2">Total Cap</td>
+                    {% for season in display_seasons %}
+
+                    <td class="money">${{ season_totals|get_item:season|intcomma }}</td>
+                    {% endfor %}
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <script>
+        function goToSeason(season) {
+            if (season) {
+                window.location.href = '/team/{{ team.abbreviation }}/' + season + '/';
+            }
+        }
+    </script>
+
+</body>
+</html>

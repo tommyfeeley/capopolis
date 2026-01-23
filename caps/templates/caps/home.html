@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load humanize %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capopolis - NHL Salary Cap Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+        }
+        
+        .conference {
+            margin-bottom: 40px;
+        }
+        
+        .conference h2 {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .divisions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .division h3 {
+            color: #888;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .team-list {
+            list-style: none;
+        }
+        
+        .team-list li {
+            margin-bottom: 8px;
+        }
+        
+        .team-list a {
+            color: #eee;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            background-color: #252542;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .team-list a:hover {
+            background-color: #3a3a5c;
+        }
+        
+        .team-abbr {
+            color: #888;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Capopolis</h1>
+    <p class="subtitle">NHL Salary Cap Tracker</p>
+    
+    <div class="conference">
+        <h2>Eastern Conference</h2>
+        <div class="divisions">
+            <div class="division">
+                <h3>Atlantic</h3>
+                <ul class="team-list">
+                    {% for team in teams %}
+                        {% if team.division == 'atlantic' %}
+                            <li>
+                                <a href="{% url 'team_overview' team.abbreviation %}">
+                                    {{ team.city }} {{ team.name }}
+                                    <span class="team-abbr">{{ team.abbreviation }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="division">
+                <h3>Metropolitan</h3>
+                <ul class="team-list">
+                    {% for team in teams %}
+                        {% if team.division == 'metropolitan' %}
+                            <li>
+                                <a href="{% url 'team_overview' team.abbreviation %}">
+                                    {{ team.city }} {{ team.name }}
+                                    <span class="team-abbr">{{ team.abbreviation }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="conference">
+        <h2>Western Conference</h2>
+        <div class="divisions">
+            <div class="division">
+                <h3>Central</h3>
+                <ul class="team-list">
+                    {% for team in teams %}
+                        {% if team.division == 'central' %}
+                            <li>
+                                <a href="{% url 'team_overview' team.abbreviation %}">
+                                    {{ team.city }} {{ team.name }}
+                                    <span class="team-abbr">{{ team.abbreviation }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="division">
+                <h3>Pacific</h3>
+                <ul class="team-list">
+                    {% for team in teams %}
+                        {% if team.division == 'pacific' %}
+                            <li>
+                                <a href="{% url 'team_overview' team.abbreviation %}">
+                                    {{ team.city }} {{ team.name }}
+                                    <span class="team-abbr">{{ team.abbreviation }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
