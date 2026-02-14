@@ -404,9 +404,9 @@
                 {% for row in forwards %}
                 <tr>
                     <td> {{row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{row.player.position}} </td>
-                    <td class="money">{{row.effective_cap_hit|intcomma }}</td>
-                    <td class="money">{{row.cap_hit.nhl_salary|intcomma}}</td>
+                    <td class="position">{{row.player.get_positions_displayed}} </td>
+                    <td class="money">${{row.effective_cap_hit|intcomma }}</td>
+                    <td class="money">${{row.cap_hit.nhl_salary|intcomma}}</td>
                     <td class="money">
                         {% if row.cap_hit.signing_bonus %}
                             ${{ row.cap_hit.signing_bonus|intcomma}}
@@ -464,9 +464,9 @@
                 {% for row in defensemen %}
                 <tr>
                     <td> {{row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{row.player.position}} </td>
-                    <td class="money">{{row.effective_cap_hit|intcomma }}</td>
-                    <td class="money">{{row.cap_hit.nhl_salary|intcomma}}</td>
+                    <td class="position">{{row.player.get_positions_displayed}} </td>
+                    <td class="money">${{row.effective_cap_hit|intcomma }}</td>
+                    <td class="money">${{row.cap_hit.nhl_salary|intcomma}}</td>
                     <td class="money">
                         {% if row.cap_hit.signing_bonus %}
                             ${{ row.cap_hit.signing_bonus|intcomma}}
@@ -526,9 +526,9 @@
                 {% for row in goalies %}
                 <tr>
                     <td> {{row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{row.player.position}} </td>
-                    <td class="money">{{row.effective_cap_hit|intcomma }}</td>
-                    <td class="money">{{row.cap_hit.nhl_salary|intcomma}}</td>
+                    <td class="position">{{row.player.get_positions_displayed}} </td>
+                    <td class="money">${{row.effective_cap_hit|intcomma }}</td>
+                    <td class="money">${{row.cap_hit.nhl_salary|intcomma}}</td>
                     <td class="money">
                         {% if row.cap_hit.signing_bonus %}
                             ${{ row.cap_hit.signing_bonus|intcomma}}

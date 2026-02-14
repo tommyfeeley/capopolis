@@ -23,12 +23,18 @@ class Player(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     position = models.CharField(max_length=2, choices=POSITION_CHOICES)
+    secondary_position = models.CharField(max_length=2, choices=POSITION_CHOICES, blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True)
 
     current_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+    def get_positions_displayed(self):
+        if self.secondary_position:
+            return f"{self.position}/{self.secondary_position}"
+        return self.position
     
 class Contract(models.Model):
     STATUS_CHOICES = [('active', 'Active'), ('bought_out', 'Bought Out'), ('terminated', 'Terminated'), ('expired', 'Expired'), ('future', 'Future',)]
