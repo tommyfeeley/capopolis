@@ -57,14 +57,14 @@
         .cap-box {
             background-color: #252542;
             padding: 25px 40px;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
             min-width: 180px;
         }
         
         .cap-box .label {
             color: #888;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
@@ -410,6 +410,7 @@
                     <td class="money">
                         {% if row.cap_hit.signing_bonus %}
                             ${{ row.cap_hit.signing_bonus|intcomma}}
+                        
                         {% endif %}
                     </td>
                     <td>
@@ -586,7 +587,7 @@
                 <tr>
                     <td>{{ row.player.first_name }} {{ row.player.last_name }}</td>
                     <td>{{ row.current_team.abbreviation }}</td>
-                    <td class="money">${{ row.retained_amount|intcomma }}</td>
+                    <td>${{ row.retained_amount|intcomma }}</td>
                     <td>{{ row.retention_percentage }}</td>
                     <td>{{ row.contract_end }}</td>
                 </tr>
@@ -604,6 +605,7 @@
             <thead>
                 <tr>
                     <th>Player</th>
+                    <th>Type</th>
                     <th>Dead Cap</th>
                 </tr>
             </thead>
@@ -612,6 +614,13 @@
                 {% for row in bought_out_contracts %}
                 <tr>
                     <td>{{ row.player.first_name}} {{ row.player.last_name }}</td>
+                    <td class="position">
+                        {% if row.is_retained %}
+                            Retained ({{ row.retention_pct}}%)
+                        {% else %}
+                            Buyout
+                        {% endif %}
+                    </td>
                     <td class="money">${{ row.cap_hit|intcomma }}</td>
 
                 </tr>

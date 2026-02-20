@@ -53,7 +53,6 @@
 
         .cap-box {
             background-color: #252542;
-
             padding: 25px 40px;
             border-radius: 10px;
             text-align: center;
@@ -225,7 +224,7 @@
             border-color: #666;
         }
 
-                .cap-bar {
+        .cap-bar {
             background-color: #252542;
             border-radius: 10px;
             padding: 20px 25px;
@@ -417,8 +416,6 @@
                     <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
                         {% if season_data %}
                             ${{ season_data.effective_cap_hit|intcomma }}
-                        {% else %}
-                            -
                         {% endif %}
                     </td>
                     {% endwith %}
@@ -469,8 +466,6 @@
                     <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
                         {% if season_data %}
                             ${{ season_data.effective_cap_hit|intcomma }}
-                        {% else %}
-                            -
                         {% endif %}
                     </td>
                     {% endwith %}
@@ -521,8 +516,6 @@
                     <td class="money {% if not season_data %}empty{% elif season_data.roster_status == 'buried' %}buried{% elif season_data.roster_status == 'ltir' %}ltir{% elif season_data.roster_status == 'ir' %}ir{% endif %}">
                         {% if season_data %}
                             ${{ season_data.effective_cap_hit|intcomma }}
-                        {% else %}
-                            -
                         {% endif %}
                     </td>
                     {% endwith %}
@@ -563,7 +556,7 @@
                 <tr>
                     <td class="player-name">{{ row.player.first_name }} {{ row.player.last_name }}</td>
                     <td>{{ row.current_team.abbreviation }}</td>
-                    <td class="money">${{ row.retained_amount|intcomma }}</td>
+                    <td>${{ row.retained_amount|intcomma }}</td>
                     <td>{{ row.retention_percentage }}</td>
                     <td>{{ row.contract_end }}</td>
                 </tr>
@@ -581,7 +574,7 @@
             <thead>
                 <tr>
                     <th>Player</th>
-                    <th></th>
+                    <th>Type</th>
                     {% for season in display_seasons %}
                     <th class="season-col">{{ season }}</th>
                     {% endfor %}
@@ -593,7 +586,15 @@
                 {% for row in bought_out_contracts %}
                 <tr>
                     <td class="player-name">{{ row.player.first_name}} {{ row.player.last_name }}</td>
-                    <td></td>
+
+                    <td class="position">
+                        {% if row.is_retained %}
+                            Retained ({{ row.retention_pct}}%)
+                        {% else %}
+                            Buyout
+                        {% endif %}
+                    </td>
+
                     {% for season in display_seasons %}
                     <td class="money {% if not row.seasons|get_item:season %} empty {% endif %}">
                         {% with cap_hit=row.seasons|get_item:season %}

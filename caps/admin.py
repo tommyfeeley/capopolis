@@ -46,6 +46,13 @@ class ContractAdmin(admin.ModelAdmin):
           {
               'fields': ('is_two_way', 'is_entry_level', 'notes')
           }),
+          ('Buyout Info', {
+              'fields': ('buyout_team', 'buyout_year'),
+              'classes': ('collapse',),
+              'description': 'Info for contracts being bought out or already bought out'
+          }
+              
+          ),
 
     )
 

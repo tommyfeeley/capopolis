@@ -53,6 +53,7 @@ def team_overview(request, abbreviation):
                 
 
     for player in players:
+        
         player_seasons = {}
 
         contract_end = None
@@ -102,8 +103,10 @@ def team_overview(request, abbreviation):
                 defensemen.append(player_data)
             elif player.position == 'G':
                 goalies.append(player_data)
+    
+    
     retained_contracts = []
-
+    
     for retained in team.retained_contracts.all():
         contract = retained.contract
 
@@ -113,22 +116,51 @@ def team_overview(request, abbreviation):
                 'retained_amount': retained.amount, 'retention_percentage': retained.retention_percentage,
                 'contract_end': contract.end_season
             })
+
+    
     bought_out_contracts = []
 
-    for contract in Contract.objects.filter(signing_team=team, status='bought_out'):
-        buyout_seasons = {}
-        for season in display_seasons:
-            cap_hit = contract.cap_hits.filter(season=season).first()
-            if cap_hit:
-                buyout_seasons[season] = cap_hit.cap_hit
-                season_totals[season] += cap_hit.cap_hit
+    for contract in Contract.objects.filter(status='bought_out'):
+        responsible_team = contract.buyout_team if contract.buyout_team else contract.signing_team
 
-        if buyout_seasons:
-            bought_out_contracts.append({
-                'player': contract.player, 'seasons': buyout_seasons,
-            })
+
+        # Oliver Ekman Larsson's Arizona/Utah contract was 12% retained, then traded to VAN and bought out. so they're on the hook for some
+        # Pretty sure this is the only contract in the league like that
+        retained = contract.retained_salaries.first()
+
+        is_buyout_team = responsible_team == team
+        is_retaining_team = (retained and retained.retaining_team ==team)
+
+        if is_buyout_team or is_retaining_team:
+            buyout_seasons = {}
+            for season in display_seasons:
+                cap_hit_obj = contract.cap_hits.filter(season=season).first()
+                if cap_hit_obj:
+                    full_buyout_cap = cap_hit_obj.cap_hit
+
+                    if retained:
+                        retained_pct = float(retained.retention_percentage) / 100
+                        # Only retained
+                        if is_retaining_team and not is_buyout_team:
+                            team_owes = int(full_buyout_cap * retained_pct)
+                        # Bought out, someone else retained
+                        elif is_buyout_team and retained.remaining_team != team:
+                            team_owes = int(full_buyout_cap * (1 - retained_pct))
+                        # Retained + Bought out (might be possible if OEL was traded back to UTA and then bought out maybe not)
+                        else:
+                            team_owes = full_buyout_cap
+                    else:
+                        team_owes = full_buyout_cap
+                    buyout_seasons[season] = team_owes
+                    season_totals[season] += team_owes
+            if buyout_seasons:
+                bought_out_contracts.append({
+                    'player': contract.player, 'seasons': buyout_seasons, 'buyout_year': contract.buyout_year, 'is_retained': is_retaining_team and not is_buyout_team,
+                    'retention_pct': retained.retention_percentage if retained and is_retaining_team else None,
+                })
 
     buried_savings = 0
+
     for group in [forwards, defensemen, goalies]:
         for player_data in group:
             current_season_data = player_data['seasons'].get('2025-26')
@@ -208,11 +240,9 @@ def team_detail(request, abbreviation, season=None):
 
     for retained in team.retained_contracts.all():
         contract = retained.contract
-        print(f"DEBUG: Found retained contract - Player: {contract.player}, Status: {contract.status}, Player's team: {contract.player.current_team}, This team: {team}")
         if contract.status == 'active' and contract.player.current_team != team:
 
             cap_hit = contract.cap_hits.filter(season=current_season).first()
-            print(f"DEBUG: Cap hit for {current_season}: {cap_hit}")
             if cap_hit:
                 total_cap += retained.amount
 
@@ -221,14 +251,45 @@ def team_detail(request, abbreviation, season=None):
                     'retained_amount': retained.amount, 'retention_percentage': retained.retention_percentage,
                     'contract_end': contract.end_season
                 })
-    print(f"DEBUG: retained_contracts list: {retained_contracts}")
-    bought_out_contracts = []
-    for contract in Contract.objects.filter(signing_team=team, status='bought_out'):
-        cap_hit = contract.cap_hits.filter(season=current_season).first()
 
-        if cap_hit:
-            total_cap += cap_hit.cap_hit
-            bought_out_contracts.append({'player':contract.player,'cap_hit':cap_hit.cap_hit})
+    bought_out_contracts = []
+
+    for contract in Contract.objects.filter(status='bought_out'):
+        responsible_team = contract.buyout_team if contract.buyout_team else contract.signing_team
+
+
+        # Oliver Ekman Larsson's Arizona/Utah contract was 12% retained, then traded to VAN and bought out. so they're on the hook for some
+        # Pretty sure this is the only contract in the league like that
+        retained = contract.retained_salaries.first()
+
+        is_buyout_team = responsible_team == team
+        is_retaining_team = (retained and retained.retaining_team ==team)
+
+        if is_buyout_team or is_retaining_team:
+                cap_hit_obj = contract.cap_hits.filter(season=season).first()
+                if cap_hit_obj:
+                    full_buyout_cap = cap_hit_obj.cap_hit
+
+                    if retained:
+                        retained_pct = float(retained.retention_percentage) / 100
+                        # Only retained
+                        if is_retaining_team and not is_buyout_team:
+                            team_owes = int(full_buyout_cap * retained_pct)
+                        # Bought out, someone else retained
+                        elif is_buyout_team and retained.remaining_team != team:
+                            team_owes = int(full_buyout_cap * (1 - retained_pct))
+                        # Retained + Bought out (might be possible if OEL was traded back to UTA and then bought out maybe not)
+                        else:
+                            team_owes = full_buyout_cap
+                    else:
+                        team_owes = full_buyout_cap
+                    total_cap += team_owes
+
+
+                bought_out_contracts.append({
+                    'player': contract.player, 'cap_hit': team_owes, 'buyout_year': contract.buyout_year, 'is_retained': is_retaining_team and not is_buyout_team,
+                    'retention_pct': retained.retention_percentage if retained and is_retaining_team else None,
+                })
 
     for player in players:
         contract_with_cap_hit = None

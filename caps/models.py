@@ -43,6 +43,14 @@ class Contract(models.Model):
 
     signing_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='signed_contracts')
 
+
+    # Optional buyout info for contracts
+
+    buyout_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='buyout_contracts', help_text="Team that actually bought out the contract")
+    buyout_year = models.CharField(max_length=7, null=True, blank=True, help_text="Season the buyout occured in 2019-20 format")
+
+    # Core contract info
+
     total_years = models.PositiveIntegerField()
     total_value = models.PositiveIntegerField()
     aav = models.PositiveIntegerField()
@@ -60,6 +68,10 @@ class Contract(models.Model):
 
     def __str__(self):
         return f"{self.player} - {self.aav:,}/yr ({self.start_season} to {self.end_season})"
+    
+    def get_buyout_team(self):
+        # Returns who is stuck with the cap hit from buying out the contract
+        return self.buyout_team if self.buyout_team else self.signing_team
     
 class CapHit(models.Model):
     ROSTER_STATUS_CHOICES = [('active', 'Active'), ('buried', 'Buried'), ('ir', 'Injured Reserve'), ('ltir', 'Long-Term IR'),]
