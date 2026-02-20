@@ -39,7 +39,7 @@ class ContractAdmin(admin.ModelAdmin):
         }),
         ('Contract Terms',
          {
-             'fields': ('total_years', 'total_value', 'aav', 'signing_date', 'start_season', 'end_season')
+             'fields': ('total_years', 'total_value', 'aav', 'signing_date', 'start_season', 'end_season', 'expiration_status')
 
          }),
          ('Contract Type',

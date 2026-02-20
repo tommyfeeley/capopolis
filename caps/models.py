@@ -37,7 +37,9 @@ class Player(models.Model):
         return self.position
     
 class Contract(models.Model):
-    STATUS_CHOICES = [('active', 'Active'), ('bought_out', 'Bought Out'), ('terminated', 'Terminated'), ('expired', 'Expired'), ('future', 'Future',)]
+    STATUS_CHOICES = [('active', 'Active'), ('future', 'Future',), ('bought_out', 'Bought Out'), ('terminated', 'Terminated'), ('expired', 'Expired'),]
+
+    FREE_AGENT_CHOICES = [('ufa', 'UFA'), ('rfa', 'RFA'), ('10.2c', '10.2(c)'),]
 
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='contracts')
 
@@ -59,6 +61,7 @@ class Contract(models.Model):
     end_season = models.CharField(max_length=7)
 
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='active')
+    expiration_status = models.CharField(max_length=10, choices=FREE_AGENT_CHOICES, default='ufa', help_text='Free agency status when contract ends')
 
     is_two_way = models.BooleanField(default=False)
     is_entry_level = models.BooleanField(default=False)

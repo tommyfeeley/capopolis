@@ -82,13 +82,7 @@ def team_overview(request, abbreviation):
             if contract.end_season:
                 if contract_end is None or contract.end_season > contract_end:
                     contract_end = contract.end_season
-
-                    # Update RFA calculation eventually below
-
-                    if contract.is_entry_level:
-                        free_agent_type = 'RFA'
-                    else:
-                        free_agent_type = 'UFA'
+                    free_agent_type = contract.expiration_status.upper()
         if player_seasons:
             player_data = {
                 'player': player,
