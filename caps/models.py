@@ -119,3 +119,17 @@ class RetainedSalary(models.Model):
     def __str__(self):
         return f"{self.retaining_team.abbreviation} retaining ${self.amount:} on {self.contract.player}"
     
+class BonusOverage(models.Model):
+    # Bonus carryover from previous season since the calculations seem whack
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='bonus_overages')
+
+    season = models.CharField(max_length=7)
+    amount = models.PositiveIntegerField()
+    notes = models.TextField(blank=True, help_text="which players bonuses caused overage")
+
+    class Meta:
+        verbose_name_plural = "Bonus overages"
+        unique_together = ['team', 'season']
+
+    def __str__(self):
+        return f"{self.team.abbreviation} - {self.season}: ${self.amount:,}"

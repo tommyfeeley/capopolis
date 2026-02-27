@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Team, Player, Contract, CapHit, RetainedSalary
+from .models import Team, Player, Contract, CapHit, RetainedSalary, BonusOverage
 
 # Create your views here.
 
@@ -24,7 +24,7 @@ def calculate_effective_cap_hit(cap_hit_obj, retained_amount=0, season='2025-26'
         return base_cap_hit
 
 def home(request):
-    teams = Team.objects.all().order_by('division', 'name')
+    teams = Team.objects.all().order_by( 'city')
     return render(request, 'caps/home.html', {'teams': teams})
 
 def team_overview(request, abbreviation):
@@ -59,6 +59,10 @@ def team_overview(request, abbreviation):
         contract_end = None
         free_agent_type = None
 
+        player_birth_date = None
+        remaining_salaries = []
+
+
         for contract in player.contracts.filter(status__in=['active', 'future']):
             retained = contract.retained_salaries.first()
             
@@ -79,16 +83,23 @@ def team_overview(request, abbreviation):
 
                     if season == '2025-26' and cap_hit.roster_status == 'ltir':
                         ltir_pool += cap_hit.cap_hit - retained_amount
+
+                    remaining_salaries.append({'season': season, 'salary': cap_hit.nhl_salary, 'signing_bonus': cap_hit.signing_bonus,})
             if contract.end_season:
                 if contract_end is None or contract.end_season > contract_end:
                     contract_end = contract.end_season
                     free_agent_type = contract.expiration_status.upper()
+            
+            player_birth_date = player.birth_date
+
         if player_seasons:
             player_data = {
                 'player': player,
                 'seasons': player_seasons,
                 'contract_end': contract_end,
                 'free_agent_type': free_agent_type,
+                'birth_date': player_birth_date,
+                'remaining_salaries': remaining_salaries,
             }
 
             if player.position in ['C', 'LW', 'RW']:
@@ -138,7 +149,7 @@ def team_overview(request, abbreviation):
                         if is_retaining_team and not is_buyout_team:
                             team_owes = int(full_buyout_cap * retained_pct)
                         # Bought out, someone else retained
-                        elif is_buyout_team and retained.remaining_team != team:
+                        elif is_buyout_team and retained.retaining_team != team:
                             team_owes = int(full_buyout_cap * (1 - retained_pct))
                         # Retained + Bought out (might be possible if OEL was traded back to UTA and then bought out maybe not)
                         else:
@@ -152,6 +163,10 @@ def team_overview(request, abbreviation):
                     'player': contract.player, 'seasons': buyout_seasons, 'buyout_year': contract.buyout_year, 'is_retained': is_retaining_team and not is_buyout_team,
                     'retention_pct': retained.retention_percentage if retained and is_retaining_team else None,
                 })
+
+    bonus_overage = None
+
+    
 
     buried_savings = 0
 
@@ -178,7 +193,15 @@ def team_overview(request, abbreviation):
 
     current_season = '2025-26'
 
-    
+    try: 
+        bonus_overage_obj = team.bonus_overages.get(season=current_season)
+        bonus_overage = {
+            'amount': bonus_overage_obj.amount,
+            'notes': bonus_overage_obj.notes,
+        }
+        season_totals[current_season] += bonus_overage_obj.amount
+    except BonusOverage.DoesNotExist:
+        pass
 
     cap_ceiling = 95500000
     current_cap = season_totals[current_season]
@@ -208,6 +231,7 @@ def team_overview(request, abbreviation):
         'active_cap_pct': active_cap_pct,
         'ltir_pct': ltir_pct,
         'space_pct': space_pct,
+        'bonus_overage': bonus_overage,
     }
 
     return render(request, 'caps/team_overview.html', context)
@@ -260,7 +284,7 @@ def team_detail(request, abbreviation, season=None):
         is_retaining_team = (retained and retained.retaining_team ==team)
 
         if is_buyout_team or is_retaining_team:
-                cap_hit_obj = contract.cap_hits.filter(season=season).first()
+                cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
                 if cap_hit_obj:
                     full_buyout_cap = cap_hit_obj.cap_hit
 
@@ -280,7 +304,7 @@ def team_detail(request, abbreviation, season=None):
                     total_cap += team_owes
 
 
-                bought_out_contracts.append({
+                    bought_out_contracts.append({
                     'player': contract.player, 'cap_hit': team_owes, 'buyout_year': contract.buyout_year, 'is_retained': is_retaining_team and not is_buyout_team,
                     'retention_pct': retained.retention_percentage if retained and is_retaining_team else None,
                 })
@@ -323,8 +347,16 @@ def team_detail(request, abbreviation, season=None):
                 defensemen.append(player_data)
             elif player.position == 'G':
                 goalies.append(player_data)
-    
-    
+    bonus_overage = None
+    try: 
+        bonus_overage_obj = team.bonus_overages.get(season=current_season)
+        bonus_overage = {
+            'amount': bonus_overage_obj.amount,
+            'notes': bonus_overage_obj.notes,
+        }
+        total_cap += bonus_overage_obj.amount
+    except BonusOverage.DoesNotExist:
+        pass
     # Sorts descending cap hits
     forwards.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
     defensemen.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
@@ -356,6 +388,7 @@ def team_detail(request, abbreviation, season=None):
         'ltir_pct': ltir_pct,
         'space_pct': space_pct,
         'active_cap': active_cap,
+        'bonus_overage': bonus_overage,
         
     }
 

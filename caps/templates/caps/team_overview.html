@@ -156,7 +156,7 @@
             color: #a78bfa;
         }
         .money.buried {
-            color: #a78bfa;
+            color: #f10dad;
         }
 
         .expiry {
@@ -308,6 +308,109 @@
             color: #888;
         }
 
+        .buyout-btn {
+            background-color: #7c2d12;
+            color: #fdba74;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .buyout-btn:hover {
+            background-color: #9a3412;
+
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #252542;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 10px;
+            color: #f87171;
+
+        }
+
+        .modal-content h3 {
+            margin-bottom: 5px;
+        }
+
+        .modal-content h4 {
+            margin: 20px 0 10px 0;
+            color: #888;
+        }
+
+        #buyout-player-age {
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .buyout-table {
+            width: 100%;
+            margin-bottom: 20px;
+
+        }
+
+        .buyout-table th, .buyout-table td {
+            padding: 8px 12px;
+
+        }
+
+        .buyout-table tfoot td {
+            border-top: 2px solid #444;
+        }
+
+        .buyout-note {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .bonus-note {
+            font-size: 0.75rem;
+            color: #fbbf24;
+        }
+
+        .overage-note {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: 10px;
+        }
+
     </style>
 
 </head>
@@ -402,6 +505,7 @@
                     </th>
                     {% endfor %}
                     <th style="text-align: center;">Expiry</th>
+                    <th style="text-align: center;">Tools</th>
                 </tr>
             </thead>
 
@@ -426,10 +530,14 @@
                             {{ row.free_agent_type}} {{row.contract_end}}
                         {% endif %}
                     </td>
+                    <td>
+                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
+                    </td>
+                    
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="{{ display_seasons|length|add:3 }}">No forwards</td>
+                    <td colspan="{{ display_seasons|length|add:4 }}">No forwards</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -452,6 +560,7 @@
                     </th>
                     {% endfor %}
                     <th style="text-align: center;">Expiry</th>
+                    <th style="text-align: center;">Tools</th>
                 </tr>
             </thead>
 
@@ -476,10 +585,13 @@
                             {{ row.free_agent_type}} {{row.contract_end}}
                         {% endif %}
                     </td>
+                    <td>
+                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="{{ display_seasons|length|add:3 }}">No defensemen</td>
+                    <td colspan="{{ display_seasons|length|add:4 }}">No defensemen</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -502,6 +614,7 @@
                     </th>
                     {% endfor %}
                     <th style="text-align: center;">Expiry</th>
+                    <th style="text-align: center;">Tools</th>
                 </tr>
             </thead>
 
@@ -526,10 +639,13 @@
                             {{ row.free_agent_type}} {{row.contract_end}}
                         {% endif %}
                     </td>
+                    <td>
+                    <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', {{ row.remaining_salaries|to_json }})">Buyout</button>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="{{ display_seasons|length|add:3 }}">No goalies</td>
+                    <td colspan="{{ display_seasons|length|add:4 }}">No goalies</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -612,6 +728,30 @@
         </table>
     </div>
 
+    {% if bonus_overage %}
+    <div class="position-group">
+        <h2 class="position-header">Performance Bonus Overage</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>{{ current_season }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Bonus Carryover
+                        {% if bonus_overage.notes %}
+                        <span class="overage-note">({{ bonus_overage.notes }})</span>
+                        {% endif %}
+                    </td>
+                    <td class="money">${{ bonus_overage.amount|intcomma }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
     <div class="position-group">
         <h2 class="position-header">Season Totals</h2>
         <table>
@@ -638,13 +778,147 @@
         </table>
     </div>
     {% endif %}
+    <div id="buyout-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeBuyoutModal()">&times;</span>
+            <h2>Buyout Calculator</h2>
+            <h3 id="buyout-player-name"></h3>
+            <p id="buyout-player-age"></p>
 
+            <div class="buyout-results">
+                <h4>Buyout Cost Breakdown</h4>
+                <table class="buyout-table">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Cap Hit</th>
+                            <th>Cash Paid</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="buyout-breakdown"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td id="buyout-total-cap"><b></b></td>
+                            <td id="buyout-total-cash"><b></b></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="buyout-note">
+                <em>Buyouts calculated assuming it happened before 2025-26, as we are outside the buyout window.
+                2/3 reamining salary spread over double the remaining years if 26+, 1/3 if under 26.
+                Signing bonuses are still guaranteed and count towards cap during the originally planned seasons
+                </em>
+            </p>
+        </div>
+    </div>
     <script>
         function goToSeason(season) {
             if (season) {
                 window.location.href = '/team/{{ team.abbreviation }}/' + season + '/';
             }
         }
+
+        function calculateBuyout(playerName, birthDate, salariesJson) {
+            document.getElementById('buyout-player-name').textContent = playerName;
+
+            const buyoutDate = new Date('2025-06-30');
+            const birth = new Date(birthDate)
+            let age = buyoutDate.getFullYear() - birth.getFullYear();
+            const monthDiff = buyoutDate.getMonth() - birth.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && buyoutDate.getDate() < birth.getDate())) {
+                age--;
+            }
+
+            document.getElementById('buyout-player-age').textContent = `Buyout Age: ${age} (Age on June 30, 2025)`;
+
+
+            // Parsing for salaries and trying to convert django template strings into js
+            let salaries = [];
+            try {
+                const jsonStr = salariesJson.replace(/'/g, '"');
+                salaries = JSON.parse(jsonStr);
+            } catch (e) {
+                console.error('Error parsing salaries:', e);
+                document.getElementById('buyout-breakdown').innerHTML = '<tr><td colspan="3">Error calculating buyout </td></tr>';
+                document.getElementById('buyout-modal').style.display = 'flex';
+                return;
+            }
+            // Buyout calculation components
+            const isOver26 = age >= 26;
+            const buyoutFraction = isOver26 ? 2/3 : 1/3;
+            const remainingYears = salaries.length;
+            const buyoutYears = remainingYears * 2;
+            // Calculate the salary left on the contract
+            let totalRemainingSalary = 0;
+            let totalSigningBonuses = 0;
+            for (const s of salaries) {
+                totalRemainingSalary += s.salary;
+                totalSigningBonuses += s.signing_bonus || 0;
+            }
+
+            // Actual buyout calculations
+            const totalBuyoutCost = Math.round(totalRemainingSalary * buyoutFraction);
+            const annualBuyoutFromSalary = Math.round(totalBuyoutCost / buyoutYears);
+
+            let html = '';
+            let totalCap = 0;
+            let totalCash = 0;
+
+            const startYear = 2025;
+            for (let i =0; i < buyoutYears; i++ ) {
+                const year1 = startYear + i;
+                const year2 = year1 + 1;
+                const season = `${year1}-${String(year2).slice(-2)}`;
+
+                let signingBonusThisYear = 0;
+                if (i < remainingYears && salaries[i]) {
+                    signingBonusThisYear = salaries[i].signing_bonus || 0;
+                }
+                // Cap hit
+                const capHitThisYear = annualBuyoutFromSalary + signingBonusThisYear;
+                // Cash paid 
+                const cashThisYear = capHitThisYear;
+
+                html += `<tr>
+                    <td>${season}</td>
+                    <td class="money">$${capHitThisYear.toLocaleString()}</td>
+                    <td class="money">$${cashThisYear.toLocaleString()}</td>
+                    ${signingBonusThisYear > 0 ? '<td class="bonus-note">(incl. $' + signingBonusThisYear.toLocaleString() + ' bonus)</td>' : '<td></td>'}
+                    </tr>`;
+                
+                totalCap += capHitThisYear;
+                totalCash += cashThisYear;
+            }
+
+            document.getElementById('buyout-breakdown').innerHTML = html;
+            document.getElementById('buyout-total-cap').innerHTML = `<strong>$${totalCap.toLocaleString()}</strong>`;
+            document.getElementById('buyout-total-cash').innerHTML = `<strong>$${totalCash.toLocaleString()}</strong>`;
+
+            document.getElementById('buyout-modal').style.display = 'flex';
+
+        }
+        
+
+        function closeBuyoutModal() {
+            document.getElementById('buyout-modal').style.display = 'none';
+        }
+
+        document.getElementById('buyout-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBuyoutModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBuyoutModal();
+            }
+        });
     </script>
 
 </body>
