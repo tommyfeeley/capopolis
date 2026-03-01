@@ -500,7 +500,7 @@
                     {% for season in display_seasons %}
                     <th class="season-col">
                         <span>CAP HIT</span>
-                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
+                        <a href="{% url 'team_detail_season' team.abbreviation season %}">{{ season }}</a>
                         
                     </th>
                     {% endfor %}
@@ -727,28 +727,36 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
 
-    {% if bonus_overage %}
+    {% if cap_penalties %}
     <div class="position-group">
-        <h2 class="position-header">Performance Bonus Overage</h2>
+        <h2 class="position-header">Cap Penalties</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Notes</th>
                     <th>{{ current_season }}</th>
                 </tr>
             </thead>
             <tbody>
+                {% for penalty in cap_penalties %}
                 <tr>
                     <td>
-                        Bonus Carryover
-                        {% if bonus_overage.notes %}
-                        <span class="overage-note">({{ bonus_overage.notes }})</span>
-                        {% endif %}
+                        {{ penalty.type }}
                     </td>
+                    <td class="overage-note">{{ penalty.notes }}</td>
                     <td class="money">${{ bonus_overage.amount|intcomma }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Total Penalties</strong></td>
+                    <td class="money"><strong>${{ cap_penalties_total|intcomma }}</strong></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
     {% endif %}
@@ -777,7 +785,6 @@
             </tbody>
         </table>
     </div>
-    {% endif %}
     <div id="buyout-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close" onclick="closeBuyoutModal()">&times;</span>

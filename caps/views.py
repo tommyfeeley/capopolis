@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Team, Player, Contract, CapHit, RetainedSalary, BonusOverage
+from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
 
 # Create your views here.
 
@@ -164,8 +164,6 @@ def team_overview(request, abbreviation):
                     'retention_pct': retained.retention_percentage if retained and is_retaining_team else None,
                 })
 
-    bonus_overage = None
-
     
 
     buried_savings = 0
@@ -193,15 +191,12 @@ def team_overview(request, abbreviation):
 
     current_season = '2025-26'
 
-    try: 
-        bonus_overage_obj = team.bonus_overages.get(season=current_season)
-        bonus_overage = {
-            'amount': bonus_overage_obj.amount,
-            'notes': bonus_overage_obj.notes,
-        }
-        season_totals[current_season] += bonus_overage_obj.amount
-    except BonusOverage.DoesNotExist:
-        pass
+    cap_penalties = []
+    cap_penalties_total = 0
+    for penalty in team.cap_penalties.filter(season=current_season):
+        cap_penalties.append({'type': penalty.get_penalty_type_display(), 'amount': penalty.amount, 'notes': penalty.notes})
+        cap_penalties_total += penalty.amount
+        season_totals[current_season] += penalty.amount
 
     cap_ceiling = 95500000
     current_cap = season_totals[current_season]
@@ -231,7 +226,8 @@ def team_overview(request, abbreviation):
         'active_cap_pct': active_cap_pct,
         'ltir_pct': ltir_pct,
         'space_pct': space_pct,
-        'bonus_overage': bonus_overage,
+        'cap_penalties': cap_penalties,
+        'cap_penalties_total':cap_penalties_total,
     }
 
     return render(request, 'caps/team_overview.html', context)
@@ -347,16 +343,14 @@ def team_detail(request, abbreviation, season=None):
                 defensemen.append(player_data)
             elif player.position == 'G':
                 goalies.append(player_data)
-    bonus_overage = None
-    try: 
-        bonus_overage_obj = team.bonus_overages.get(season=current_season)
-        bonus_overage = {
-            'amount': bonus_overage_obj.amount,
-            'notes': bonus_overage_obj.notes,
-        }
-        total_cap += bonus_overage_obj.amount
-    except BonusOverage.DoesNotExist:
-        pass
+    
+    cap_penalties = []
+    cap_penalties_total = 0
+    for penalty in team.cap_penalties.filter(season=current_season):
+        cap_penalties.append({'type': penalty.get_penalty_type_display(), 'amount': penalty.amount, 'notes': penalty.notes})
+        cap_penalties_total += penalty.amount
+        total_cap += penalty.amount
+
     # Sorts descending cap hits
     forwards.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
     defensemen.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
@@ -388,7 +382,8 @@ def team_detail(request, abbreviation, season=None):
         'ltir_pct': ltir_pct,
         'space_pct': space_pct,
         'active_cap': active_cap,
-        'bonus_overage': bonus_overage,
+        'cap_penalties': cap_penalties,
+        'cap_penalties_total': cap_penalties_total,
         
     }
 
