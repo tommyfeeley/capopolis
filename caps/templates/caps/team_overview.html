@@ -531,9 +531,9 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
+                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
                     </td>
-                    
+                    <!--escapejs is for K'andre miller, the apostrophe is screwing the JS up. Should be some french last names with them too. D'Astous on tampa.-->
                 </tr>
                 {% empty %}
                 <tr>
@@ -586,7 +586,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
+                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -640,7 +640,7 @@
                         {% endif %}
                     </td>
                     <td>
-                    <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name }} {{ row.player.last_name }}', '{{ row.birth_date|date:"Y-m-d" }}', {{ row.remaining_salaries|to_json }})">Buyout</button>
+                        <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', {{ row.remaining_salaries|to_json }})">Buyout</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -747,7 +747,7 @@
                         {{ penalty.type }}
                     </td>
                     <td class="overage-note">{{ penalty.notes }}</td>
-                    <td class="money">${{ bonus_overage.amount|intcomma }}</td>
+                    <td class="money">${{ penalty.amount|intcomma }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
