@@ -411,6 +411,232 @@
             margin-left: 10px;
         }
 
+        .calc-toggle-btn {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+
+        .calc-toggle-btn:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            transform: translateY(-1px);
+        }
+
+        .calc-toggle-btn.active {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .calc-toggle-btn.active:hover {
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
+        }
+
+        .calc-banner {
+            display: none;
+            background: linear-gradient(90deg, #059669, #10b981);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .calc-banner.visible {
+            display: flex;
+        }
+
+        .calc-banner-text {
+            font-weight: 600;
+        }
+
+        .calc-banner-hint {
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+
+        .calc-checkbox-col {
+            display: none;
+            width: 40px;
+            text-align: center;
+        }
+
+        body.calc-mode .calc-checkbox-col {
+            display: table-cell;
+        }
+
+        .calc-checkbox {
+            width: 10px;
+            height: 10px;
+            cursor: pointer;
+            accent-color: #10b981;
+
+        }
+
+        tr.calc-removed td {
+            opacity: 0.3;
+            text-decoration: line-through;
+
+        }
+
+        tr.calc-removed td.calc-checkbox-col {
+            opacity: 1;
+            text-decoration: none;
+        }
+
+        .calc-tracker {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 340px;
+            max-height: 50vh;
+            background-color: #1e1e3a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            z-index: 900;
+            overflow: hidden;
+        }
+
+        .calc-tracker .visible {
+            display: block;
+        }
+
+        .calc-tracker-header {
+            background-color: #252542;
+            padding: 15px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calc-tracker-header h3 {
+            font-size: 0.95rem;
+            color: #10b981;
+        }
+
+        .calc-reset-btn {
+            background-color: #7c2d12;
+            color: #fdba74;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calc-reset-btn:hover {
+            background-color: #9a3412;
+        }
+
+        .calc-tracker-body {
+            padding: 15px;
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        .calc-tracker-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .calc-tracker-body::-webkit-scrollbar-thumb {
+            background-color: #444;
+            border-radius: 3px;
+        }
+
+        .calc-change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+            font-size: 0.85rem;
+        }
+
+        .calc-change-item:last-child {
+            border-bottom: none;
+        }
+
+        .calc-change-name {
+            color: #ccc;
+        }
+
+        .calc-change-amount {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .calc-empty-msg {
+            color: #666;
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .calc-tracker-footer {
+            background-color: #252542;
+            padding: 12px 15px;
+            border-top: 1px solid #444;
+            
+        }
+
+        .calc-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .calc-footer-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .calc-footer-label {
+            color: #888;
+        }
+
+        .calc-footer-value {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-weight: 600;
+        }
+
+        .calc-footer-value.positive {
+            color: #4ade80;
+        }
+
+        .calc-footer-value.negative {
+            color: #f87171;
+        }
+
+        .calc-delta {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 6px;
+        }
+
+        .calc-delta.saved {
+            background-color: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+        }
+
+        .calc-delta.added {
+            background-color: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
     </style>
 
 </head>
@@ -433,6 +659,15 @@
                     {% endfor %}
                 </select>
             </div>
+            <button class="calc-toggle-btn" id="calc-toggle" onclick="toggleCalculator()">Cap Calculator</button>
+        </div>
+
+        <!--Calculator Mode (Remove players, then later you'll be able to add em too)-->
+        <div class="calc-banner" id="calc-banner">
+            <div>
+                <span class="calc-banner-text">Cap Calculator Mode</span>
+                <span class="calc-banner-hint">Uncheck players to see how trades affect cap</span>
+            </div>
         </div>
 
         <div class="cap-summary">
@@ -442,15 +677,15 @@
             </div>
             <div class="cap-box">
                 <div class="label">Current Cap</div>
-                <div class="value">${{ current_cap|intcomma }}</div>
+                <div class="value" id="cap-value-current">${{ current_cap|intcomma }}</div>
             </div>
             <div class="cap-box ltir">
                 <div class="label">LTIR Pool</div>
-                <div class="value">${{ ltir_pool|intcomma }}</div>
+                <div class="value" id="cap-value-ltir">${{ ltir_pool|intcomma }}</div>
             </div>
             <div class="cap-box space">
                 <div class="label">Cap Space</div>
-                <div class="value">${{ cap_space|intcomma }}</div>
+                <div class="value" id="cap-value-space">${{ cap_space|intcomma }}</div>
             </div>
         </div>
     </header>
@@ -460,13 +695,13 @@
             <span>Cap Breakdown</span>
         </div>
         <div class="cap-bar-visual">
-            <div class="cap-bar-active" style="width: {{ active_cap_pct }}%;" title="Active Cap: ${{ active_cap|intcomma }}">
+            <div class="cap-bar-active" id="cap-bar-active" style="width: {{ active_cap_pct }}%;" title="Active Cap: ${{ active_cap|intcomma }}">
             </div>
             {% if ltir_pct > 0 %}
-            <div class="cap-bar-ltir" style="width: {{ ltir_pct }}%;" title="LTIR: ${{ ltir_pool|intcomma }}">
+            <div class="cap-bar-ltir" id="cap-bar-ltir" style="width: {{ ltir_pct }}%;" title="LTIR: ${{ ltir_pool|intcomma }}">
             </div>
             {% endif %}
-            <div class="cap-bar-space" style="width: {{ space_pct }}%;" title="Cap Space: ${{ cap_space|intcomma }}">
+            <div class="cap-bar-space" id="cap-bar-space" style="width: {{ space_pct }}%;" title="Cap Space: ${{ cap_space|intcomma }}">
             </div>
         </div>
         <div class="cap-bar-legend">
@@ -490,11 +725,14 @@
         </div>
     </div>
 
+    {% with group_name="forwards" %}
+
     <div class="position-group">
         <h2 class="position-header">Forwards</h2>
         <table>
             <thead>
                 <tr>
+                    <th class="calc-checkbox-col"></th>
                     <th>Player</th>
                     <th>Pos</th>
                     {% for season in display_seasons %}
@@ -511,7 +749,10 @@
 
             <tbody>
                 {% for row in forwards %}
-                <tr>
+                <tr data-calc-group="forwards" data-calc-index="{{ forloop.counter0 }}">
+                    <td class="calc-checkbox-col">
+                        <input type="checkbox" class="calc-checkbox" checked data-group="forwards" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
+                    </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
                     <td class="position">{{ row.player.position }}</td>
 
@@ -537,6 +778,7 @@
                 </tr>
                 {% empty %}
                 <tr>
+                    <td class="calc-checkbox-col"></td>
                     <td colspan="{{ display_seasons|length|add:4 }}">No forwards</td>
                 </tr>
                 {% endfor %}
@@ -545,12 +787,16 @@
         </table>
 
     </div>
+    {% endwith %}
+
+    {% with group_name="defensemen" %}
 
     <div class="position-group">
         <h2 class="position-header">Defensemen</h2>
         <table>
             <thead>
                 <tr>
+                    <th class="calc-checkbox-col"></th>
                     <th>Player</th>
                     <th>Pos</th>
                     {% for season in display_seasons %}
@@ -566,7 +812,10 @@
 
             <tbody>
                 {% for row in defensemen %}
-                <tr>
+                <tr data-calc-group="defensemen" data-calc-index="{{ forloop.counter0 }}">
+                    <td class="calc-checkbox-col">
+                        <input type="checkbox" class="calc-checkbox" checked-data-group="defensemen" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
+                    </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
                     <td class="position">{{ row.player.position }}</td>
 
@@ -591,6 +840,7 @@
                 </tr>
                 {% empty %}
                 <tr>
+                    <td class="calc-checkbox-col"></td>
                     <td colspan="{{ display_seasons|length|add:4 }}">No defensemen</td>
                 </tr>
                 {% endfor %}
@@ -599,12 +849,16 @@
         </table>
 
     </div>
+    {% endwith %}
+
+    {% with group_name="goalies" %}
 
     <div class="position-group">
         <h2 class="position-header">Goalies</h2>
         <table>
             <thead>
                 <tr>
+                    <th class="calc-checkbox-col"></th>
                     <th>Player</th>
                     <th>Pos</th>
                     {% for season in display_seasons %}
@@ -620,7 +874,10 @@
 
             <tbody>
                 {% for row in goalies %}
-                <tr>
+                <tr data-calc-group="goalies" data-calc-index="{{ forloop.counter0 }}">
+                    <td class="calc-checkbox-col">
+                        <input type="checkbox" class="calc-checkbox" checked-data-group="goalies" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
+                    </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
                     <td class="position">{{ row.player.position }}</td>
 
@@ -645,6 +902,7 @@
                 </tr>
                 {% empty %}
                 <tr>
+                    <td class="calc-checkbox-col"></td>
                     <td colspan="{{ display_seasons|length|add:4 }}">No goalies</td>
                 </tr>
                 {% endfor %}
@@ -653,6 +911,7 @@
         </table>
 
     </div>
+    {% endwith %}
 
     {% if retained_contracts %}
     <div class="position-group">
@@ -785,6 +1044,8 @@
             </tbody>
         </table>
     </div>
+
+    <!--Buyout modal-->
     <div id="buyout-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close" onclick="closeBuyoutModal()">&times;</span>
@@ -822,6 +1083,33 @@
             </p>
         </div>
     </div>
+
+    <!--Cap Calculator Tracking-->
+
+    <div class="calc-tracker" id="calc-tracker">
+        <div class="calc-tracker-header">
+            <h3>Cap Calculator</h3>
+            <button class="calc-reset-btn" onclick="resetCalculator()">Reset All</button>
+        </div>
+        <div class="calc-tracker-body" id="calc-tracker-body">
+            <p class="calc-empty-msg">Uncheck players to simulate trades</p>
+        </div>
+        <div class="calc-tracker-footer" id="calc-tracker-footer">
+            <div class="calc-footer-row">
+                <span class="calc-footer-label">New Cap Hit</span>
+                <span class="calc-footer-value" id="calc-new-cap"></span>
+            </div>
+            <div class="calc-footer-row">
+                <span class="calc-footer-label">New Cap Space</span>
+                <span class="calc-footer-value" id="calc-new-space"></span>
+            </div>
+            <div class="calc-footer-row">
+                <span class="calc-footer-label">Change</span>
+                <span id="calc-delta-display"></span>
+            </div>
+        </div>
+    </div>
+
     <script>
         function goToSeason(season) {
             if (season) {
@@ -926,6 +1214,206 @@
                 closeBuyoutModal();
             }
         });
+
+        // Dynamic Cap Calculation stuff for adding/removing players
+        const CALC_DATA = JSON.parse('{{ calculator_data|escapejs }}');
+        let calcActive = false;
+        let removedPlayers = new Set();
+ 
+        // Safe element setters
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+ 
+        function toggleCalculator() {
+            calcActive = !calcActive;
+            const btn = document.getElementById('calc-toggle');
+            const banner = document.getElementById('calc-banner');
+            const tracker = document.getElementById('calc-tracker');
+ 
+            if (calcActive) {
+                document.body.classList.add('calc-mode');
+                btn.classList.add('active');
+                btn.textContent = 'Exit Calculator';
+                banner.classList.add('visible');
+                tracker.classList.add('visible');
+                updateCalcDisplay();
+            } else {
+                // FIX #2: was 'calc-move', must be 'calc-mode'
+                document.body.classList.remove('calc-mode');
+                btn.classList.remove('active');
+                btn.textContent = 'Cap Calculator';
+                banner.classList.remove('visible');
+                tracker.classList.remove('visible');
+                resetCalculator();
+            }
+        }
+ 
+        function onCalcToggle(checkbox) {
+            if (!calcActive) return;
+ 
+            const group = checkbox.dataset.group;
+            const index = parseInt(checkbox.dataset.index);
+ 
+            const playerId = getPlayerIdByGroupIndex(group, index);
+            const player = CALC_DATA.players.find(p => p.id === playerId);
+ 
+            if (!player) return;
+ 
+            const row = checkbox.closest('tr');
+ 
+            if (checkbox.checked) {
+                removedPlayers.delete(player.id);
+                row.classList.remove('calc-removed');
+            } else {
+                removedPlayers.add(player.id);
+                row.classList.add('calc-removed');
+            }
+ 
+            updateCalcDisplay();
+        }
+ 
+        function getPlayerIdByGroupIndex(group, index) {
+            const groupPlayers = CALC_DATA.players.filter(p => p.group === group);
+            if (index < groupPlayers.length) {
+                return groupPlayers[index].id;
+            }
+            return -1;
+        }
+ 
+        function updateCalcDisplay() {
+            let removedCapTotal = 0;
+            let removedLtirTotal = 0;
+            let changes = [];
+ 
+            for (const pid of removedPlayers) {
+                // FIX #3: was p,id (comma operator), must be p.id (dot)
+                const player = CALC_DATA.players.find(p => p.id === pid);
+                if (player) {
+                    removedCapTotal += player.cap_hit;
+                    if (player.is_ltir) {
+                        removedLtirTotal += player.raw_cap_hit;
+                    }
+                    changes.push({
+                        name: player.name,
+                        position: player.position,
+                        cap_hit: player.cap_hit,
+                        is_ltir: player.is_ltir,
+                    });
+                }
+            }
+ 
+            const newCap = CALC_DATA.current_cap - removedCapTotal;
+            const newLtir = CALC_DATA.ltir_pool - removedLtirTotal;
+            const newSpace = CALC_DATA.cap_ceiling - newCap + newLtir;
+            const savedAmount = removedCapTotal;
+ 
+            // Update cap summary boxes
+            setText('cap-value-current', '$' + newCap.toLocaleString());
+            setText('cap-value-ltir', '$' + newLtir.toLocaleString());
+            setText('cap-value-space', '$' + newSpace.toLocaleString());
+ 
+            // Update the cap bar
+            const newActive = newCap - newLtir;
+            const ceiling = CALC_DATA.cap_ceiling;
+            const activePct = Math.max(0, (newActive / ceiling) * 100);
+            const ltirPct = Math.max(0, (newLtir / ceiling) * 100);
+            const spacePct = Math.max(0, Math.min(100 - activePct - ltirPct, (newSpace / ceiling) * 100));
+ 
+            const barActive = document.getElementById('bar-active');
+            const barLtir = document.getElementById('bar-ltir');
+            const barSpace = document.getElementById('bar-space');
+ 
+            if (barActive) barActive.style.width = activePct + '%';
+            if (barLtir) barLtir.style.width = ltirPct + '%';
+            if (barSpace) barSpace.style.width = spacePct + '%';
+ 
+            // Update legend
+            const legendActive = document.getElementById('legend-active');
+            const legendLtir = document.getElementById('legend-ltir');
+            const legendSpace = document.getElementById('legend-space');
+ 
+            if (legendActive) legendActive.textContent = 'Active Cap: $' + newActive.toLocaleString();
+            if (legendLtir) legendLtir.textContent = 'LTIR: $' + newLtir.toLocaleString();
+            if (legendSpace) legendSpace.textContent = 'Cap Space: $' + newSpace.toLocaleString();
+ 
+            // Update tracker panel
+            const trackerBody = document.getElementById('calc-tracker-body');
+            if (trackerBody) {
+                if (changes.length === 0) {
+                    // FIX #4: was missing > after class attribute
+                    trackerBody.innerHTML = '<p class="calc-empty-msg">Uncheck players to simulate trades</p>';
+                } else {
+                    let html = '';
+                    for (const c of changes) {
+                        html += `<div class="calc-change-item">
+                            <span class="calc-change-name">${c.name} <span style="color:#666;font-size:0.75rem">${c.position}${c.is_ltir ? ' (LTIR)' : ''}</span></span>
+                            <span class="calc-change-amount">-$${c.cap_hit.toLocaleString()}</span>
+                        </div>`;
+                    }
+                    trackerBody.innerHTML = html;
+                }
+            }
+ 
+            // Update footer — FIX #7: null checks on all elements
+            setText('calc-new-cap', '$' + newCap.toLocaleString());
+ 
+            const spaceEl = document.getElementById('calc-new-space');
+            if (spaceEl) {
+                spaceEl.textContent = '$' + newSpace.toLocaleString();
+                spaceEl.className = 'calc-footer-value ' + (newSpace >= 0 ? 'positive' : 'negative');
+            }
+ 
+            const deltaEl = document.getElementById('calc-delta-display');
+            if (deltaEl) {
+                if (savedAmount > 0) {
+                    deltaEl.innerHTML = `<span class="calc-delta saved">+$${savedAmount.toLocaleString()} freed</span>`;
+                } else {
+                    deltaEl.innerHTML = '<span style="color:#666;font-size:0.8rem">No changes</span>';
+                }
+            }
+        }
+ 
+        function resetCalculator() {
+            removedPlayers.clear();
+ 
+            document.querySelectorAll('tr.calc-removed').forEach(row => {
+                row.classList.remove('calc-removed');
+            });
+            document.querySelectorAll('.calc-checkbox').forEach(cb => {
+                cb.checked = true;
+            });
+ 
+            // FIX #6: was 'cap-current-value', must be 'cap-value-current'
+            setText('cap-value-current', '$' + CALC_DATA.current_cap.toLocaleString());
+            setText('cap-value-ltir', '$' + CALC_DATA.ltir_pool.toLocaleString());
+ 
+            const origSpace = CALC_DATA.cap_ceiling - CALC_DATA.current_cap + CALC_DATA.ltir_pool;
+            setText('cap-value-space', '$' + origSpace.toLocaleString());
+ 
+            const origActive = CALC_DATA.current_cap - CALC_DATA.ltir_pool;
+            const ceiling = CALC_DATA.cap_ceiling;
+            const barActive = document.getElementById('bar-active');
+            const barLtir = document.getElementById('bar-ltir');
+            const barSpace = document.getElementById('bar-space');
+ 
+            if (barActive) barActive.style.width = ((origActive / ceiling) * 100) + '%';
+            if (barLtir) barLtir.style.width = ((CALC_DATA.ltir_pool / ceiling) * 100) + '%';
+            if (barSpace) barSpace.style.width = ((origSpace / ceiling) * 100) + '%';
+ 
+            const legendActive = document.getElementById('legend-active');
+            const legendLtir = document.getElementById('legend-ltir');
+            const legendSpace = document.getElementById('legend-space');
+ 
+            if (legendActive) legendActive.textContent = 'Active Cap: $' + origActive.toLocaleString();
+            if (legendLtir) legendLtir.textContent = 'LTIR: $' + CALC_DATA.ltir_pool.toLocaleString();
+            if (legendSpace) legendSpace.textContent = 'Cap Space: $' + origSpace.toLocaleString();
+ 
+            if (calcActive) {
+                updateCalcDisplay();
+            }
+        }
     </script>
 
 </body>

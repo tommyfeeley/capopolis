@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, get_object_or_404
 from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
 
@@ -207,6 +208,33 @@ def team_overview(request, abbreviation):
     ltir_pct = (ltir_pool / cap_ceiling) * 100 if cap_ceiling > 0 else 0
     space_pct = (cap_space / cap_ceiling) * 100 if cap_ceiling > 0 else 0
 
+    # Json for cap calculation
+
+    calc_players = []
+    player_id_counter = 0
+    for group_name, group in [('forwards', forwards), ('defensemen', defensemen), ('goalies', goalies)]:
+        for x in group:
+            current = x['seasons'].get(current_season)
+            if current:
+                calc_players.append({'id': player_id_counter, 
+                                     'name': f"{x['player'].first_name} {x['player'].last_name}",
+                                     'position': x['player'].position,
+                                     'group': group_name,
+                                     'cap_hit': current['effective_cap_hit'], 'is_ltir': current['roster_status'] == 'ltir',
+                                     'raw_cap_hit': current['cab_hit_obj'].cap_hit - current.get('retained_amount', 0) if current.get('roster_status') == 'ltir' else 0,
+                })
+                player_id_counter += 1
+
+    # Buyouts and cap penalties, retained might need extra work depending on if you can go between teams and it remembers or not
+    calc_dead_cap = 0
+    for bo in bought_out_contracts:
+        if current_season in bo['seasons']:
+            calc_dead_cap += bo['seasons'][current_season]
+    calc_dead_cap += cap_penalties_total
+    calc_dead_cap += retained_cap_totals.get(current_season, 0)
+
+    calculator_data = json.dumps({'players': calc_players, 'cap_ceiling': cap_ceiling, 'current_cap': current_cap, 'ltir_pool': ltir_pool, 'dead_cap': calc_dead_cap})
+
     context = {
         'team': team,
         'forwards': forwards,
@@ -228,6 +256,7 @@ def team_overview(request, abbreviation):
         'space_pct': space_pct,
         'cap_penalties': cap_penalties,
         'cap_penalties_total':cap_penalties_total,
+        'calculator_data': calculator_data,
     }
 
     return render(request, 'caps/team_overview.html', context)
