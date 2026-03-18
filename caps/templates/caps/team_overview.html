@@ -506,7 +506,7 @@
             overflow: hidden;
         }
 
-        .calc-tracker .visible {
+        .calc-tracker.visible {
             display: block;
         }
 
@@ -637,6 +637,280 @@
             background-color: rgba(248, 113, 113, 0.15);
             color: #f87171;
         }
+
+        .calc-search-container {
+            display: none;
+            margin-bottom: 25px;
+        }
+
+        body.calc-mode .calc-search-container {
+            display: block;
+        }
+
+        .calc-search-bar {
+            position: relative;
+            max-width: 500px;
+        }
+
+        #calc-search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #252542;
+            border: 2px solid #444;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #calc-search-input:focus {
+            border-color: #10b981;
+        }
+
+        #calc-search-input::placeholder {
+            color: #666; /* spooky*/
+        }
+
+        .calc-search-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #1e1e3a;
+            border: 1px solid #444;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 800;
+        }
+
+        .calc-search-results.visible {
+            display: block;
+        }
+
+        .calc-search-result-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            transition: background-color 0.15s;
+        }
+
+        .calc-search-result-item:hover {
+            background-color: #252542;
+        }
+
+        .calc-search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .calc-result-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calc-result-name {
+            color: #eee;
+            font-weight: 500;
+        }
+
+        .calc-result-meta {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .calc-result-cap {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            color: #6eb5ff;
+            font-size: 0.9rem;
+        }
+
+        .calc-search-empty {
+            padding: 15px 16px;
+            color: #666;
+            text-align: center;
+            font-family: 0.85rem;
+        }
+
+        .calc-search-loading {
+            padding: 15px 16px;
+            color: #888;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .calc-add-panel {
+            max-width: 500px;
+            background-color: #252542;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .calc-add-player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #444;
+        }
+
+        .calc-add-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .calc-add-detail {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .calc-add-label {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .calc-retained-controls {
+            margin-bottom: 15px;
+        }
+
+        .calc-retained-presets {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .calc-preset-btn {
+            background-color: #1a1a2e;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 5px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.15s;
+        }
+
+        .calc-preset-btn:hover {
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .calc-preset-btn.active {
+            background-color: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+
+        .calc-retained-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #calc-retained-slider {
+            flex: 1;
+            accent-color: #10b981;
+            height: 6px;
+        }
+
+        #calc-retained-input {
+            width: 70px;
+            padding: 5px 8px;
+            background-color: #1a1a2e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #eee;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+        #calc-retained-input:focus {
+            border-color: #10b981;
+            outline: none;
+        }
+
+        .calc-retained-pct-label {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .calc-retained-summary {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .calc-retained-result {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-weight: 600;
+            color: #f87171;
+        }
+
+        .calc-add-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calc-add-confirm {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+
+        .calc-add-confirm:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+        }
+
+        .calc-add-cancel {
+            background-color: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .calc-add-cancel:hover {
+            border-color: #888;
+            color: #ccc;
+        }
+
+        .calc-change-amount.added-player {
+            color: #f87171;
+        }
+
+        .calc-added-remove {
+            color: #666;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-left: 6px;
+        }
+
+        .calc-added-remove:hover {
+            color: #f87171;
+        }
+
+        
     </style>
 
 </head>
@@ -645,7 +919,7 @@
 
     <header>
         <h1>{{team.city}} {{team.name}}</h1>
-
+        <!--Season selector and cap calculator mode buttons-->
         <div class="view-options">
             <span class="current-view">Multi-Season Overview</span>
             <div class="season-selector">
@@ -689,35 +963,35 @@
             </div>
         </div>
     </header>
-
+    <!--Cap bar visualizing allocated cap, cap space, LTIR Space (bonus cap space if players badly injured bascially)-->
     <div class="cap-bar">
         <div class="cap-bar-labels-top">
             <span>Cap Breakdown</span>
         </div>
         <div class="cap-bar-visual">
-            <div class="cap-bar-active" id="cap-bar-active" style="width: {{ active_cap_pct }}%;" title="Active Cap: ${{ active_cap|intcomma }}">
+            <div class="cap-bar-active" id="bar-active" style="width: {{ active_cap_pct }}%;" title="Active Cap: ${{ active_cap|intcomma }}">
             </div>
             {% if ltir_pct > 0 %}
-            <div class="cap-bar-ltir" id="cap-bar-ltir" style="width: {{ ltir_pct }}%;" title="LTIR: ${{ ltir_pool|intcomma }}">
+            <div class="cap-bar-ltir" id="bar-ltir" style="width: {{ ltir_pct }}%;" title="LTIR: ${{ ltir_pool|intcomma }}">
             </div>
             {% endif %}
-            <div class="cap-bar-space" id="cap-bar-space" style="width: {{ space_pct }}%;" title="Cap Space: ${{ cap_space|intcomma }}">
+            <div class="cap-bar-space" id="bar-space" style="width: {{ space_pct }}%;" title="Cap Space: ${{ cap_space|intcomma }}">
             </div>
         </div>
         <div class="cap-bar-legend">
             <div class="legend-item">
                 <span class="legend-color active"></span>
-                <span class="legend-label">Active Cap: ${{ active_cap|intcomma }}</span>
+                <span class="legend-label" id="legend-label">Active Cap: ${{ active_cap|intcomma }}</span>
             </div>
             {% if ltir_pool > 0 %}
             <div class="legend-item">
                 <span class="legend-color ltir"></span>
-                <span class="legend-label">LTIR: ${{ ltir_pool|intcomma }}</span>
+                <span class="legend-label" id="legend-ltir">LTIR: ${{ ltir_pool|intcomma }}</span>
             </div>
             {% endif %}
             <div class="legend-item">
                 <span class="legend-color space"></span>
-                <span class="legend-label">Cap Space: ${{ cap_space|intcomma }}</span>
+                <span class="legend-label" id="legend-space">Cap Space: ${{ cap_space|intcomma }}</span>
             </div>
             <div class="legend-item ceiling">
                 <span class="legend-label">Ceiling: ${{ cap_ceiling|intcomma }}</span>
@@ -725,6 +999,47 @@
         </div>
     </div>
 
+    <!--Player search bar-->
+
+    <div class="calc-search-container" id="calc-search-container">
+        <div class="calc-search-bar">
+            <input type="text" id="calc-search-input" placeholder="Add a player (start typing any name)..." autocomplete="off">
+            <div class="calc-search-results" id="calc-search-results"></div>
+        </div>
+    </div>
+
+    <div class="calc-add-panel" id="calc-add-panel" style="display: none;">
+        <div class="calc-add-panel-inner">
+            <div class="calc-add-player-info">
+                <span class="calc-add-name" id="calc-add-name"></span>
+                <span class="calc-add-detail" id="calc-add-detail"></span>    
+            </div>
+            <div class="calc-add-retained">
+                <label class="calc-add-label">Retained Salary</label>
+                <div class="calc-retained-controls">
+                    <div class="calc-retained-presets">
+                        <button class="calc-preset-btn" onclick="setRetainedPct(0)">0%</button>
+                        <button class="calc-preset-btn" onclick="setRetainedPct(25)">25%</button>
+                        <button class="calc-preset-btn" onclick="setRetainedPct(50)">50%</button>
+                    </div>
+                    <div class="calc-retained-slider-row">
+                        <input type="range" id="calc-retained-slider" min="0" max="50" step="0.01" value="0" oninput="onRetainedSliderChange(this.value)">
+                        <input type="number" id="calc-retained-input" min="0" max="50" step="0.01" value="0" oninput="onRetainedInputChange(this.value)">
+                        <span class="calc-retained-pct-label">%</span>
+                    </div>
+                    <div class="calc-retained-summary">
+                        <span>Cap hit to this team:</span>
+                        <span class="calc-retained-result" id="calc-retained-result">$0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="calc-add-actions">
+                <button class="calc-add-confirm" onclick="confirmAddPlayer()">Add to Roster</button>
+                <button class="calc-add-cancel" onclick="cancelAddPlayer()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!--Forwards Section-->
     {% with group_name="forwards" %}
 
     <div class="position-group">
@@ -788,7 +1103,7 @@
 
     </div>
     {% endwith %}
-
+    <!--Defensemen section-->
     {% with group_name="defensemen" %}
 
     <div class="position-group">
@@ -814,7 +1129,7 @@
                 {% for row in defensemen %}
                 <tr data-calc-group="defensemen" data-calc-index="{{ forloop.counter0 }}">
                     <td class="calc-checkbox-col">
-                        <input type="checkbox" class="calc-checkbox" checked-data-group="defensemen" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
+                        <input type="checkbox" class="calc-checkbox" checked data-group="defensemen" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
                     </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
                     <td class="position">{{ row.player.position }}</td>
@@ -850,7 +1165,7 @@
 
     </div>
     {% endwith %}
-
+    <!--Goalie section-->
     {% with group_name="goalies" %}
 
     <div class="position-group">
@@ -876,7 +1191,7 @@
                 {% for row in goalies %}
                 <tr data-calc-group="goalies" data-calc-index="{{ forloop.counter0 }}">
                     <td class="calc-checkbox-col">
-                        <input type="checkbox" class="calc-checkbox" checked-data-group="goalies" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
+                        <input type="checkbox" class="calc-checkbox" checked data-group="goalies" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
                     </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
                     <td class="position">{{ row.player.position }}</td>
@@ -912,7 +1227,7 @@
 
     </div>
     {% endwith %}
-
+    <!--Retained salary on contracts, up to 50% per player. Can be retained by multiple teams. New rule where has to be 70 reg season days between each retention, old double retention is fine.-->
     {% if retained_contracts %}
     <div class="position-group">
         <h2 class="position-header">Retained Salary</h2>
@@ -941,7 +1256,7 @@
     </div>
     {% endif %}
 
-
+    <!--Bought out contracts, teams can payout a contract at once to have a lower cap hit some seasons but having a cap penalty for 2x the remaining years left on the players contract-->
     {% if bought_out_contracts %}
     <div class="position-group">
         <h2 class="position-header">Bought Out Contracts</h2>
@@ -987,7 +1302,7 @@
         </table>
     </div>
     {% endif %}
-
+    <!--Cap penalties, usually related to entry level players performance bonuses so if a superstar rookie comes in sort of situation-->
     {% if cap_penalties %}
     <div class="position-group">
         <h2 class="position-header">Cap Penalties</h2>
@@ -1019,6 +1334,7 @@
         </table>
     </div>
     {% endif %}
+    <!--Totals for each season-->
     <div class="position-group">
         <h2 class="position-header">Season Totals</h2>
         <table>
@@ -1219,8 +1535,11 @@
         const CALC_DATA = JSON.parse('{{ calculator_data|escapejs }}');
         let calcActive = false;
         let removedPlayers = new Set();
+        const TEAM_ABBR = '{{ team.abbreviation }}';
+        let addedPlayers = [];
+        let pendingPlayer = null;
  
-        // Safe element setters
+        // Safe element setters, we were getting some errors otherwise when a team didnt have anyone on LTIR and then it was trying to grab a null value and do tolocalestring on it
         function setText(id, text) {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
@@ -1240,7 +1559,6 @@
                 tracker.classList.add('visible');
                 updateCalcDisplay();
             } else {
-                // FIX #2: was 'calc-move', must be 'calc-mode'
                 document.body.classList.remove('calc-mode');
                 btn.classList.remove('active');
                 btn.textContent = 'Cap Calculator';
@@ -1281,21 +1599,217 @@
             }
             return -1;
         }
- 
+
+        // So here I realized when starting to do the search how it probably is just way faster to use a trie to access our players, than to be making a bunch of api calls with an endpoint
+        // So we should just be able to access our players essentially instantly with the trie
+
+        const ALL_PLAYERS = JSON.parse('{{ trie_data|escapejs }}')
+        
+        class TrieNode {
+            constructor() {
+                this.children = {};
+                this.playerIds = []; // ALL_PLAYERS indices
+            }
+        }
+
+        class Trie {
+            constructor() {
+                this.root = new TrieNode();
+            }
+            insert(key, playerId) {
+                let node = this.root;
+                for (const ch of key.toLowerCase()) {
+                    if (!node.children[ch]) {
+                        node.children[ch] = new TrieNode();
+                    }
+                    node = node.children[ch]
+
+                    if (!node.playerIds.includes(playerId)) {
+                        node.playerIds.push(playerId);
+                    }
+                }
+            }
+
+            search(prefix, limit=5) {
+                let node = this.root;
+                for (const ch of prefix.toLowerCase()) {
+                    if (!node.children[ch]) return [];
+                    node = node.children[ch];
+                }
+                return node.playerIds.slice(0, limit);
+            }
+        }
+
+        // Build the trie
+        const playerTrie = new Trie();
+        for (let i = 0; i < ALL_PLAYERS.length; i++) {
+            const p = ALL_PLAYERS[i];
+            // Index by first, last, first+last names
+            playerTrie.insert(p.first, i)
+            playerTrie.insert(p.last, i)
+            playerTrie.insert(p.first + ' ' + p.last, i)
+        }
+
+        const searchInput = document.getElementById('calc-search-input');
+        const searchResults = document.getElementById('calc-search-results');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            if (query.length < 1) {
+                searchResults.classList.remove('visible');
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            const matchIds = playerTrie.search(query, 10);
+
+            const matches = matchIds
+                .map(idx => ALL_PLAYERS[idx])
+                .filter(p => !addedPlayers.find(ap => ap.id === p.id));
+
+            if (matches.length === 0) {
+                searchResults.innerHTML = '<div class="calc-search-empty">No players found</div>';
+                searchResults.classList.add('visible');
+                return;
+            }
+
+            matches.sort((a, b) => b.cap_hit - a.cap_hit);
+            const top = matches.slice(0, 5);
+
+            let html = '';
+            for (const p of top) {
+                // Data attribute to help avoid quote problems
+                html += `<div class="calc-search-result-item" data-player-id="${p.id}">
+                            <div class="calc-result-left">
+                                <span class="calc-result-name">${p.name}</span>
+                                <span class="calc-result-meta">${p.position} - ${p.team}</span>
+                            </div>
+                            <span class="calc-result-cap">$${p.cap_hit.toLocaleString()}</span>
+                            </div>`
+            }
+
+            searchResults.innerHTML = html;
+            searchResults.classList.add('visible');
+
+            //Click Handlers
+            searchResults.querySelectorAll('.calc-search-result-item').forEach(e1 => {
+                e1.addEventListener('click', function() {
+                    const pid = parseInt(this.dataset.playerId);
+                    const player = ALL_PLAYERS.find(p => p.id === pid);
+                    if (player) selectPlayerToAdd(player);
+                });
+            });
+        });
+
+        // Close search results if user clicks outside of it
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.calc-search-bar')) {
+                searchResults.classList.remove('visible');
+            }
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1 && searchResults.innerHTML) {
+                searchResults.classList.add('visible');
+            }
+        });
+
+        // Adding a player retained
+
+        function selectPlayerToAdd(player) {
+            pendingPlayer = player;
+            searchResults.classList.remove('visible');
+            searchInput.value = '';
+            //Show panel
+            const panel = document.getElementById('calc-add-panel');
+            document.getElementById('calc-add-name').textContent = player.name;
+            document.getElementById('calc-add-detail').textContent = `${player.position} - ${player.team} - AAV $${player.cap_hit.toLocaleString()}`;
+
+            // Reset retained to 0
+
+            setRetainedPct(0);
+            panel.style.display = 'block';
+
+        
+        }
+
+        function setRetainedPct(pct) {
+            document.getElementById('calc-retained-slider').value = pct;
+            document.getElementById('calc-retained-input').value = pct;
+            updateRetainedDisplay(pct);
+
+            document.querySelectorAll('.calc-preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseFloat(btn.textContent) === pct) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function onRetainedSliderChange(val) {
+            const pct = parseFloat(val) || 0;
+            document.getElementById('calc-retained-input').value = pct.toFixed(2);
+            updateRetainedDisplay(pct);
+            document.querySelectorAll('.calc-preset-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        function onRetainedInputChange(val) {
+            let pct = parseFloat(val) || 0;
+            pct = Math.max(0, Math.min(50, pct));
+            document.getElementById('calc-retained-slider').value = pct;
+            updateRetainedDisplay(pct);
+            document.querySelectorAll('.calc-preset-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        function updateRetainedDisplay(pct) {
+            if (!pendingPlayer) return;
+            const retained = pendingPlayer.cap_hit * (pct / 100);
+            const effectiveHit = Math.round(pendingPlayer.cap_hit - retained);
+            document.getElementById('calc-retained-result').textContent = '$' + effectiveHit.toLocaleString();
+        }
+
+        function confirmAddPlayer() {
+            if (!pendingPlayer) return;
+
+            const retainedPct = parseFloat(document.getElementById('calc-retained-input').value) || 0;
+            const retained = pendingPlayer.cap_hit * (retainedPct / 100);
+            const effectiveHit = Math.round(pendingPlayer.cap_hit - retained);
+
+            addedPlayers.push({id: pendingPlayer.id, name: pendingPlayer.name, position: pendingPlayer.position, team: pendingPlayer.team, cap_hit: pendingPlayer.cap_hit, 
+                retained_pct: retainedPct, effective_cap_hit: effectiveHit,
+            });
+
+            pendingPlayer = null;
+            document.getElementById('calc-add-panel').style.display = 'none';
+            updateCalcDisplay();
+        }
+        function cancelAddPlayer() {
+            pendingPlayer = null;
+            document.getElementById('calc-add-panel').style.display = 'none'
+        }
+
+        function removeAddedPlayer(playerId) {
+            addedPlayers = addedPlayers.filter(p => p.id !== playerId);
+            updateCalcDisplay();
+        }
+        
         function updateCalcDisplay() {
             let removedCapTotal = 0;
             let removedLtirTotal = 0;
-            let changes = [];
- 
+            let addedCapTotal = 0;
+            let removedChanges = [];
+            let addedChanges = [];
+            
+            // Removal
             for (const pid of removedPlayers) {
-                // FIX #3: was p,id (comma operator), must be p.id (dot)
                 const player = CALC_DATA.players.find(p => p.id === pid);
                 if (player) {
                     removedCapTotal += player.cap_hit;
                     if (player.is_ltir) {
                         removedLtirTotal += player.raw_cap_hit;
                     }
-                    changes.push({
+                    removedChanges.push({
                         name: player.name,
                         position: player.position,
                         cap_hit: player.cap_hit,
@@ -1303,11 +1817,19 @@
                     });
                 }
             }
+
+            // Player addition
+            for (const ap of addedPlayers) {
+                addedCapTotal += ap.effective_cap_hit;
+                addedChanges.push({
+                    id: ap.id, name: ap.name, position: ap.position, team: ap.team, cap_hit: ap.effective_cap_hit, retained_pct: ap.retained_pct,
+                });
+            }
  
-            const newCap = CALC_DATA.current_cap - removedCapTotal;
+            const newCap = CALC_DATA.current_cap - removedCapTotal + addedCapTotal;
             const newLtir = CALC_DATA.ltir_pool - removedLtirTotal;
             const newSpace = CALC_DATA.cap_ceiling - newCap + newLtir;
-            const savedAmount = removedCapTotal;
+            const netChange = addedCapTotal - removedCapTotal;
  
             // Update cap summary boxes
             setText('cap-value-current', '$' + newCap.toLocaleString());
@@ -1341,22 +1863,31 @@
             // Update tracker panel
             const trackerBody = document.getElementById('calc-tracker-body');
             if (trackerBody) {
-                if (changes.length === 0) {
-                    // FIX #4: was missing > after class attribute
-                    trackerBody.innerHTML = '<p class="calc-empty-msg">Uncheck players to simulate trades</p>';
+                if (removedChanges.length === 0 && addedChanges.length === 0) {
+                    trackerBody.innerHTML = '<p class="calc-empty-msg">Uncheck players to remove or search to add</p>';
                 } else {
                     let html = '';
-                    for (const c of changes) {
+                    for (const c of removedChanges) {
                         html += `<div class="calc-change-item">
                             <span class="calc-change-name">${c.name} <span style="color:#666;font-size:0.75rem">${c.position}${c.is_ltir ? ' (LTIR)' : ''}</span></span>
                             <span class="calc-change-amount">-$${c.cap_hit.toLocaleString()}</span>
                         </div>`;
                     }
+
+                    for (const c of addedChanges) {
+                        const retainedNote = c.retained_pct > 0 ? ` (${c.retained_pct}% ret.)` : '';
+                        html += `<div class ="calc-change-item">
+                            <span class="calc-change-name">${c.name} <span style="color: #666; font-size: 0.75rem">${c.position} - ${c.team}${retainedNote}</span>
+                                <span class="calc-added-remove" onclick="removeAddedPlayer(${c.id})">X</span>
+                            </span>
+                            <span class="calc-change-amount added-player">+$${c.cap_hit.toLocaleString()}</span>
+                        </div>`;
+                    }
+
                     trackerBody.innerHTML = html;
                 }
             }
  
-            // Update footer — FIX #7: null checks on all elements
             setText('calc-new-cap', '$' + newCap.toLocaleString());
  
             const spaceEl = document.getElementById('calc-new-space');
@@ -1367,16 +1898,29 @@
  
             const deltaEl = document.getElementById('calc-delta-display');
             if (deltaEl) {
-                if (savedAmount > 0) {
-                    deltaEl.innerHTML = `<span class="calc-delta saved">+$${savedAmount.toLocaleString()} freed</span>`;
+                if (netChange < 0) {
+                    //Net saved
+                    deltaEl.innerHTML = `<span class="calc-delta saved">+$${Math.abs(netChange).toLocaleString()} freed</span>`;
+                } else if (netChange > 0) {
+                    //Net added
+                    deltaEl.innerHTML = `<span class="calc-delta added">-$${netChange.toLocaleString()} added</span>`;
+                } else if (removedChanges.length > 0 || addedChanges.length > 0) {
+                    deltaEl.innerHTML = `<span style="color: #888; font-size: 0.8rem">Net zero</span>`;
                 } else {
-                    deltaEl.innerHTML = '<span style="color:#666;font-size:0.8rem">No changes</span>';
+                    deltaEl.innerHTML = `<span style="color: #666; font-size: 0.8rem">No changes</span>`
                 }
             }
         }
  
         function resetCalculator() {
             removedPlayers.clear();
+            addedPlayers = [];
+            pendingPlayer = null;
+
+            document.getElementById('calc-add-panel').style.display = 'none';
+
+            document.getElementById('calc-search-input').value = '';
+            document.getElementById('calc-search-results').classList.remove('visible');
  
             document.querySelectorAll('tr.calc-removed').forEach(row => {
                 row.classList.remove('calc-removed');
@@ -1385,7 +1929,6 @@
                 cb.checked = true;
             });
  
-            // FIX #6: was 'cap-current-value', must be 'cap-value-current'
             setText('cap-value-current', '$' + CALC_DATA.current_cap.toLocaleString());
             setText('cap-value-ltir', '$' + CALC_DATA.ltir_pool.toLocaleString());
  

@@ -1,5 +1,7 @@
 import json
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Q
 from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
 
 # Create your views here.
@@ -235,6 +237,28 @@ def team_overview(request, abbreviation):
 
     calculator_data = json.dumps({'players': calc_players, 'cap_ceiling': cap_ceiling, 'current_cap': current_cap, 'ltir_pool': ltir_pool, 'dead_cap': calc_dead_cap})
 
+    # Build json with all players for our client side trie
+    # Every player with active contract, instant autocomplete
+    
+    all_players_for_trie = []
+    all_players_qs = Player.objects.select_related('current_team').all()
+
+    for player in all_players_qs:
+
+        if player.current_team == team:
+            continue
+            
+        for contract in player.contracts.filter(status__in=['active', 'future']):
+            cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
+            if cap_hit_obj:
+                retained = contract.retained_salaries.first()
+                retained_amount = retained.amount if retained else 0 
+                effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
+
+                all_players_for_trie.append({'id':player.id, 'name': f"{player.first_name} {player.last_name}", 'first': player.first_name.lower(), 'last': player.last_name.lower(),
+                                              'position': player.position, 'team': player.current_team.abbreviation if player.current_team else 'FA', 'cap_hit': cap_hit_obj.cap_hit, 'effective_cap_hit': effective,})
+                break
+    trie_data = json.dumps(all_players_for_trie)
     context = {
         'team': team,
         'forwards': forwards,
@@ -257,6 +281,7 @@ def team_overview(request, abbreviation):
         'cap_penalties': cap_penalties,
         'cap_penalties_total':cap_penalties_total,
         'calculator_data': calculator_data,
+        'trie_data': trie_data,
     }
 
     return render(request, 'caps/team_overview.html', context)
@@ -417,3 +442,46 @@ def team_detail(request, abbreviation, season=None):
     }
 
     return render(request, 'caps/team_detail.html', context)
+
+def api_player_search(request):
+    # API for searching player name, returning player salary
+    query = request.GET.get('q', '').strip()
+    exclude_team = request.GET.get('exclude_team', '').strip().upper()
+    current_season = '2025-26'
+
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+
+    parts = query.split()
+    players = Player.objects.all()
+
+    if len(parts) == 1:
+        # match first OR last
+        players = players.filter(Q(first_name__icontains=parts[0]) | Q(last_name__icontains=parts[0]))
+    else:
+        players = players.filter(Q(first_name__icontains=parts[0]) & Q(last_name__icontains=parts[-1]))
+    
+    if exclude_team:
+        players = players.exclude(current_team__abbreviation=exclude_team)
+    
+    results = []
+
+    for player in players[:20]:
+        for contract in player.contracts.filter(status__in=['active', 'future']):
+            cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
+            if cap_hit_obj:
+                # check if contract already had retention
+                retained = contract.retained_salaries.first()
+                retained_amount = retained.amount if retained else 0
+
+                effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
+
+                results.append({
+                    'id': player.id, 'name': f"{player.first_name} {player.last_name}", 'position': player.position, 'team': player.current_team.abbreviation if player.current_team else 'FA', 'cap_hit': cap_hit_obj.cap_hit, 
+                    'effective_cap_hit': effective, 'retained_amount': retained_amount, 'roster_status': cap_hit_obj.roster_status,
+                })
+                break
+
+    results.sort(key=lambda x: x['cap_hit'], reverse=True)
+
+    return JsonResponse({'results': results[:10]})
