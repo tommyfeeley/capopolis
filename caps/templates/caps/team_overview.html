@@ -910,6 +910,54 @@
             color: #f87171;
         }
 
+        .calc-customer-fields {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .calc-custom-field-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .calc-custom-field {
+            flex: 1;
+        }
+
+        #calc-custom-cap {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #1a1a2e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #eee;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        #calc-custom-cap:focus {
+            border-color: #10b981;
+            outline: none;
+        }
+
+        #calc-custom-position {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #1a1a2e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #eee;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        #calc-custom-position:focus {
+            border-color: #10b981;
+            outline: none;
+        }
+
+
         
     </style>
 
@@ -1014,6 +1062,27 @@
                 <span class="calc-add-name" id="calc-add-name"></span>
                 <span class="calc-add-detail" id="calc-add-detail"></span>    
             </div>
+
+            <div class="calc-custom-fields" id="calc-custom-fields" style="display: none;">
+                <div class="calc-custom-field-row">
+                    <div class="calc-custom-field">
+                        <label class="calc-add-label">Cap Hit ($)</label>
+                        <input type="number" id="calc-custom-cap" min="775000" max="20000000" step="50000" value="0" placeholder="ex: 900000" oninput="onCustomCapChange()">
+                    </div>
+                    <div class="calc-custom-field">
+                        <label class="calc-add-label">Position</label>
+                        <select  id="calc-custom-position">
+                            <option value="C">C</option>
+                            <option value="LW">LW</option>
+                            <option value="RW">RW</option>
+                            <option value="LD">LD</option>
+                            <option value="RD">RD</option>
+                            <option value="G">G</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="calc-add-retained">
                 <label class="calc-add-label">Retained Salary</label>
                 <div class="calc-retained-controls">
@@ -1661,16 +1730,28 @@
                 searchResults.innerHTML = '';
                 return;
             }
-
+            // Trie lookup instantly
             const matchIds = playerTrie.search(query, 10);
-
+            // Filter players already added
             const matches = matchIds
                 .map(idx => ALL_PLAYERS[idx])
                 .filter(p => !addedPlayers.find(ap => ap.id === p.id));
 
             if (matches.length === 0) {
-                searchResults.innerHTML = '<div class="calc-search-empty">No players found</div>';
+                // No matches so offer to make a custom player
+                const safeName = query.replace(/</, '&lt;').replace(/>/g, '&gt;');
+                searchResults.innerHTML = `<div class="calc-search-result-item calc-custom-create" data-custom-name="${safeName}">
+                    <div class="calc-result-left">
+                        <span class="calc-result-name"> Create "${safeName}" as custom player</span>
+                        <span class="calc-result-meta">Set your own cap hit</span>
+                    </div>
+                    <span class="calc-result-cap" style="color:#10b981;">+ Custom</span>
+                    </div>`;
                 searchResults.classList.add('visible');
+
+                searchResults.querySelector('.calc-custom-create').addEventListener('click', function() {
+                    openCustomPlayerForm(this.dataset.customName);
+                });
                 return;
             }
 
@@ -1689,17 +1770,35 @@
                             </div>`
             }
 
+            // Create custom option
+            const safeName2 = query.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            html += `<div class="calc-search-result-item calc-custom-create" data-custom-name="${safeName2}" style="border-top:2px solid #333;">
+                <div class="calc-result-left">
+                    <span class="calc-result-name" style="color:#10b981;">Create "${safeName2}" as custom player</span>
+                    </div>
+                    <span class="calc-result-cap" style="color:#10b981;">+ Custom</span>
+                    </div>`;
+                
+
             searchResults.innerHTML = html;
             searchResults.classList.add('visible');
 
             //Click Handlers
-            searchResults.querySelectorAll('.calc-search-result-item').forEach(e1 => {
+            searchResults.querySelectorAll('.calc-search-result-item:not(.calc-custom-create)').forEach(e1 => {
                 e1.addEventListener('click', function() {
                     const pid = parseInt(this.dataset.playerId);
                     const player = ALL_PLAYERS.find(p => p.id === pid);
                     if (player) selectPlayerToAdd(player);
                 });
             });
+
+            //Attach click handle for custom player creation
+            const customBtn = searchResults.querySelector('.calc-custom-create');
+            if (customBtn) {
+                customBtn.addEventListener('click', function() {
+                    openCustomPlayerForm(this.dataset.customName);
+                });
+            }
         });
 
         // Close search results if user clicks outside of it
@@ -1717,12 +1816,18 @@
 
         // Adding a player retained
 
+        let isCustomPlayer = false;
+        let customIdCounter = -1;
+
         function selectPlayerToAdd(player) {
             pendingPlayer = player;
+            isCustomPlayer = false;
             searchResults.classList.remove('visible');
             searchInput.value = '';
+
             //Show panel
             const panel = document.getElementById('calc-add-panel');
+            document.getElementById('calc-custom-fields').style.display = 'none';
             document.getElementById('calc-add-name').textContent = player.name;
             document.getElementById('calc-add-detail').textContent = `${player.position} - ${player.team} - AAV $${player.cap_hit.toLocaleString()}`;
 
@@ -1732,6 +1837,39 @@
             panel.style.display = 'block';
 
         
+        }
+        
+        function openCustomPlayerForm(name) {
+            isCustomPlayer = true;
+            searchResults.classList.remove('visible');
+            searchInput.value = '';
+
+            // Temporary player object
+            pendingPlayer = {
+                id: customIdCounter--, name: name, position: 'C', team: 'Custom', cap_hit: 0, effective_cap_hit: 0,
+            };
+
+            const panel = document.getElementById('calc-add-panel');
+            document.getElementById('calc-custom-fields').style.display = 'block';
+            document.getElementById('calc-add-name').textContent = name;
+            document.getElementById('calc-add-detail').textContent = 'Custom Player';
+
+            // Reset
+
+            document.getElementById('calc-custom-cap').value = '';
+            document.getElementById('calc-custom-position').value = 'C';
+            setRetainedPct(0);
+
+            panel.style.display = 'block';
+        }
+
+        function onCustomCapChange() {
+            const capVal = parseInt(document.getElementById('calc-custom-cap').value) || 0;
+            if (pendingPlayer && isCustomPlayer) {
+                pendingPlayer.cap_hit = capVal;
+                const pct = parseInt(document.getElementById('calc-retained-input').value) || 0;
+                updateRetainedDisplay(pct);
+            }
         }
 
         function setRetainedPct(pct) {
@@ -1772,21 +1910,36 @@
         function confirmAddPlayer() {
             if (!pendingPlayer) return;
 
+            if (isCustomPlayer) {
+                const capVal = parseInt(document.getElementById('calc-custom-cap').value) || 0;
+                if (capVal <= 0) {
+                    // Red border pops up and goes away quick as some feedback to user that inputs are working
+                    const capInput = document.getElementById('calc-custom-cap');
+                    capInput.style.borderColor = '#f87171';
+                    setTimeout(() => { capInput.style.borderColor = '#444'; }, 1500);
+                    return;
+                }
+                pendingPlayer.cap_hit = capVal;
+                pendingPlayer.position = document.getElementById('calc-custom-position').value;
+            }
+
             const retainedPct = parseFloat(document.getElementById('calc-retained-input').value) || 0;
             const retained = pendingPlayer.cap_hit * (retainedPct / 100);
             const effectiveHit = Math.round(pendingPlayer.cap_hit - retained);
 
             addedPlayers.push({id: pendingPlayer.id, name: pendingPlayer.name, position: pendingPlayer.position, team: pendingPlayer.team, cap_hit: pendingPlayer.cap_hit, 
-                retained_pct: retainedPct, effective_cap_hit: effectiveHit,
+                retained_pct: retainedPct, effective_cap_hit: effectiveHit, is_custom: isCustomPlayer,
             });
 
             pendingPlayer = null;
+            isCustomPlayer = false;
             document.getElementById('calc-add-panel').style.display = 'none';
             updateCalcDisplay();
         }
         function cancelAddPlayer() {
             pendingPlayer = null;
-            document.getElementById('calc-add-panel').style.display = 'none'
+            isCustomPlayer = false;
+            document.getElementById('calc-add-panel').style.display = 'none';
         }
 
         function removeAddedPlayer(playerId) {
@@ -1876,8 +2029,9 @@
 
                     for (const c of addedChanges) {
                         const retainedNote = c.retained_pct > 0 ? ` (${c.retained_pct}% ret.)` : '';
+                        const teamLabel = c.is_custom ? 'Custom' : c.team;
                         html += `<div class ="calc-change-item">
-                            <span class="calc-change-name">${c.name} <span style="color: #666; font-size: 0.75rem">${c.position} - ${c.team}${retainedNote}</span>
+                            <span class="calc-change-name">${c.name} <span style="color: #666; font-size: 0.75rem">${c.position} - ${teamLabel}${retainedNote}</span>
                                 <span class="calc-added-remove" onclick="removeAddedPlayer(${c.id})">X</span>
                             </span>
                             <span class="calc-change-amount added-player">+$${c.cap_hit.toLocaleString()}</span>
