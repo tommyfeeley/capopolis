@@ -1,6 +1,7 @@
 # Capopolis
 
-<img width="1915" height="1080" alt="Capopolis" src="https://github.com/user-attachments/assets/b0828427-d027-49e5-8300-8ba731fc21c1" />
+<img width="1915" height="1080" alt="Capopolis" src="https://github.com/user-attachments/assets/95a6eeff-581f-40a3-92ab-41f802c0e38f" />
+
 
 An NHL salary cap tracking application built with Django that models the full complexity of the NHL's Collective Bargaining Agreement — including buried contracts, LTIR relief, buyout calculations, retained salary, and performance bonus overages.
 
