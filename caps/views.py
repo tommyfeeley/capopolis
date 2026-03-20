@@ -6,8 +6,8 @@ from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
 
 # Create your views here.
 
-buried_thresholdz = {
-    '2022-23': 1125000, '2023-24': 1150000, '2024-25': 1150000, '2026-27': 1150000, '2028-29': 1150000, '2029-30': 1150000, '2030-31': 1150000, '2031-32': 1150000, '2032-33': 1150000,
+buried_thresholds = {
+    '2022-23': 1125000, '2023-24': 1150000, '2024-25': 1150000, '2025-26': 1150000, '2026-27': 1150000, '2027-28': 1150000, '2028-29': 1150000, '2029-30': 1150000, '2030-31': 1150000, '2031-32': 1150000, '2032-33': 1150000,
     }
 
 def calculate_effective_cap_hit(cap_hit_obj, retained_amount=0, season='2025-26'):
@@ -19,7 +19,7 @@ def calculate_effective_cap_hit(cap_hit_obj, retained_amount=0, season='2025-26'
     base_cap_hit = cap_hit_obj.cap_hit - retained_amount
 
     if cap_hit_obj.roster_status == 'buried':
-        buried_threshold = buried_thresholdz.get(season, 1150000)
+        buried_threshold = buried_thresholds.get(season, 1150000)
 
         buried_cap_hit = max(base_cap_hit - buried_threshold, 0)
         return buried_cap_hit
@@ -344,7 +344,7 @@ def team_detail(request, abbreviation, season=None):
                         if is_retaining_team and not is_buyout_team:
                             team_owes = int(full_buyout_cap * retained_pct)
                         # Bought out, someone else retained
-                        elif is_buyout_team and retained.remaining_team != team:
+                        elif is_buyout_team and retained.retaining_team != team:
                             team_owes = int(full_buyout_cap * (1 - retained_pct))
                         # Retained + Bought out (might be possible if OEL was traded back to UTA and then bought out maybe not)
                         else:

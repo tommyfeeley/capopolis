@@ -134,4 +134,4 @@ class CapPenalty(models.Model):
         unique_together = ['team', 'season', 'penalty_type']
 
     def __str__(self):
-        return f"{self.team.abbreviation} - {self.season} - (self.get_penalty_type_display()) ${self.amount:,}"
+        return f"{self.team.abbreviation} - {self.season} - {self.get_penalty_type_display()} ${self.amount:,}"

@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% load humanize cap_filters %}
+    {% load humanize cap_filters static %}
+    <link rel="icon" type="image/png" href="{% static 'caps/favicon.png' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ team.city }} {{ team.name }} - Capopolis</title>
+    <title>{{ team.city }} {{ team.name }} {{ current_season }} - Capopolis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,10 +17,62 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #1a1a2e;
-            color: #eee;
-            padding: 20px;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0f0f1a;
+            color: #e8e8f0;
+        }
+
+        .site-nav {
+            background-color: #12121f;
+            border-bottom: 1px solid #2a2a45;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            height: 52px;
+            margin-bottom: 24px;
+        }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e8e8f0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-brand-icon {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .nav-team {
+            margin-left: 16px;
+            color: #8888a8;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .nav-season {
+            margin-left: 4px;
+            color: #6366f1;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .page-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px 30px;
         }
         
         a {
@@ -73,7 +129,7 @@
         .cap-box .value {
             font-size: 1.5rem;
             font-weight: bold;
-            font-family: 'SF Mono', 'Consolas', monospace;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
         }
         
         .cap-box.space .value {
@@ -98,7 +154,7 @@
         .cap-bar-visual {
             height: 35px;
             background-color: #1a1a2e;
-            border: 6px;
+            border-radius: 6px;
             overflow: hidden;
             display: flex;
         }
@@ -139,7 +195,7 @@
         .legend-color {
             width: 14px;
             height: 14px;
-            border: 3px;
+            border-radius: 3px;
         }
 
 
@@ -195,7 +251,7 @@
         }
         
         .money {
-            font-family: 'SF Mono', 'Consolas', monospace;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
         }
         
         .status-badge {
@@ -303,8 +359,16 @@
     </style>
 </head>
 <body>
-    <a href="{% url 'home' %}" class="back-link">← All Teams</a>
-    
+    <nav class="site-nav">
+        <a href="{% url 'home' %}" class="nav-brand">
+            <span class="nav-brand-icon">C</span>
+            Capopolis
+        </a>
+        <span class="nav-team">/ <a href="{% url 'team_overview' team.abbreviation %}" style="color:#8888a8;text-decoration:none;">{{ team.abbreviation }}</a></span>
+        <span class="nav-season">/ {{ current_season }}</span>
+    </nav>
+
+    <div class="page-content">
     <header>
         <h1>{{ team.city }} {{ team.name }}</h1>
         <div class="view-options">
@@ -497,7 +561,6 @@
                     </span> 
                         {% endif %}
                     </td>
-                    </td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -558,7 +621,6 @@
                             {% endif %}
                     </span> 
                         {% endif %}
-                    </td>
                     </td>
                 </tr>
 
@@ -674,5 +736,6 @@
         }
     </script>
 
+    </div>
 </body>
 </html>
