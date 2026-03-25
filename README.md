@@ -1,7 +1,7 @@
 # Capopolis
 https://capopolis.pythonanywhere.com/
 
-![Logo](screenshots/Capopolis.png)
+![Logo](screenshots/Capopolis.svg)
 
 An NHL salary cap tracking application built with Django that models the full complexity of the NHL's Collective Bargaining Agreement — including buried contracts, LTIR relief, buyout calculations, retained salary, and performance bonus overages.
 
