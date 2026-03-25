@@ -1,7 +1,7 @@
 ![Capopolis](https://github.com/user-attachments/assets/3a66e491-99ae-44bf-a101-4840228c9d85)
 # Capopolis
 (screenshots/Capopolis.png)
-
+https://capopolis.pythonanywhere.com/
 An NHL salary cap tracking application built with Django that models the full complexity of the NHL's Collective Bargaining Agreement — including buried contracts, LTIR relief, buyout calculations, retained salary, and performance bonus overages.
 
 Covers all 32 NHL teams with 898 players, 970 contracts, and 3,677 individual season cap hits manually entered for accuracy.
