@@ -190,6 +190,7 @@
             align-items: center;
             gap: 8px;
             font-size: 0.85rem;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
         }
 
         .legend-color {
@@ -268,7 +269,7 @@
         
         .status-buried {
             background-color: #854d0e;
-            color: #f10dad;
+            color: #fd9722;
         }
         
         .status-ir {
@@ -655,9 +656,9 @@
                 <tr>
                     <td>{{ row.player.first_name }} {{ row.player.last_name }}</td>
                     <td>{{ row.current_team.abbreviation }}</td>
-                    <td>${{ row.retained_amount|intcomma }}</td>
-                    <td>{{ row.retention_percentage }}</td>
-                    <td>{{ row.contract_end }}</td>
+                    <td class="money" style="text-align: left;">${{ row.retained_amount|intcomma }}</td>
+                    <td class="money" style="text-align: left;">{{ row.retention_percentage }}</td>
+                    <td class="money" style="text-align: left;">{{ row.contract_end }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -686,7 +687,7 @@
                         {% if row.is_retained %}
                             Retained ({{ row.retention_pct}}%)
                         {% else %}
-                            Buyout
+                            Buyout (nothing retained)
                         {% endif %}
                     </td>
                     <td class="money">${{ row.cap_hit|intcomma }}</td>
@@ -716,14 +717,14 @@
                         {{ penalty.type }}
                     </td>
                     <td class="overage-note">{{ penalty.notes }}</td>
-                    <td class="money">${{ penalty.amount|intcomma }}</td>
+                    <td class="money" style="text-align: left;">${{ penalty.amount|intcomma }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="2"><strong>Total Penalties</strong></td>
-                    <td class="money"><strong>${{ cap_penalties_total|intcomma }}</strong></td>
+                    <td class="money" style="text-align: left;"><strong>${{ cap_penalties_total|intcomma }}</strong></td>
                 </tr>
             </tfoot>
         </table>

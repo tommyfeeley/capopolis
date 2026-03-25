@@ -67,14 +67,6 @@
             text-align: center;
             padding: 44px 0 36px;
         }
-
-        h1 {
-            font-size: 2.6rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            margin-bottom: 6px;
-            font-family: 'Cinzel', serif;
-        }
         
         .subtitle {
             color: #8888a8;
@@ -162,6 +154,12 @@
             margin-top: 20px;
         }
 
+        .home-logo {
+            height: 64px;
+            width: auto;
+            padding-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .divisions {
                 grid-template-columns: 1fr;
@@ -186,7 +184,7 @@
 
     <div class="page-content">
         <div class="home-hero">
-            <h1>Capopolis</h1>
+            <h1><img src="{% static 'caps/Capopolis-cropped.svg' %}" alt="Capopolis" class="home-logo"></h1>
             <p class="subtitle">NHL Salary Cap Tracker</p>
         </div>
 
@@ -264,7 +262,7 @@
     </div>
 
     <footer class="site-footer">
-        Capopolis &mdash; NHL Salary Cap Tracker
+        Capopolis &mdash; NHL Salary Cap Tracker &mdash; Tommy Feeley
     </footer>
 </body>
 </html>

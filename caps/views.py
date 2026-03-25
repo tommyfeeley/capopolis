@@ -96,6 +96,9 @@ def team_overview(request, abbreviation):
             player_birth_date = player.birth_date
 
         if player_seasons:
+            current_season_data = player_seasons.get('2025-26')
+            current_roster_status = current_season_data.get('roster_status', 'active') if current_season_data else 'active'
+
             player_data = {
                 'player': player,
                 'seasons': player_seasons,
@@ -103,6 +106,7 @@ def team_overview(request, abbreviation):
                 'free_agent_type': free_agent_type,
                 'birth_date': player_birth_date,
                 'remaining_salaries': remaining_salaries,
+                'current_roster_status': current_roster_status,
             }
 
             if player.position in ['C', 'LW', 'RW']:
@@ -256,7 +260,8 @@ def team_overview(request, abbreviation):
                 effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
 
                 all_players_for_trie.append({'id':player.id, 'name': f"{player.first_name} {player.last_name}", 'first': player.first_name.lower(), 'last': player.last_name.lower(),
-                                              'position': player.position, 'team': player.current_team.abbreviation if player.current_team else 'FA', 'cap_hit': cap_hit_obj.cap_hit, 'effective_cap_hit': effective,})
+                              'position': player.position, 'team': player.current_team.abbreviation if player.current_team else 'FA', 'cap_hit': cap_hit_obj.cap_hit, 'effective_cap_hit': effective,
+                              'has_nmc': cap_hit_obj.has_nmc, 'has_ntc': cap_hit_obj.has_ntc, 'has_modified_ntc': cap_hit_obj.has_modified_ntc, 'ntc_teams_can_block': cap_hit_obj.ntc_teams_can_block,})
                 break
     trie_data = json.dumps(all_players_for_trie)
     context = {
