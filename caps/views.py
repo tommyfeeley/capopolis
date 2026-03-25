@@ -242,28 +242,10 @@ def team_overview(request, abbreviation):
     calculator_data = json.dumps({'players': calc_players, 'cap_ceiling': cap_ceiling, 'current_cap': current_cap, 'ltir_pool': ltir_pool, 'dead_cap': calc_dead_cap})
 
     # Build json with all players for our client side trie
-    # Every player with active contract, instant autocomplete
+    # Had to change to background loading cuz the trie was taking 10-15s to load each team's page which is trash
     
-    all_players_for_trie = []
-    all_players_qs = Player.objects.select_related('current_team').all()
 
-    for player in all_players_qs:
-
-        if player.current_team == team:
-            continue
-            
-        for contract in player.contracts.filter(status__in=['active', 'future']):
-            cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
-            if cap_hit_obj:
-                retained = contract.retained_salaries.first()
-                retained_amount = retained.amount if retained else 0 
-                effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
-
-                all_players_for_trie.append({'id':player.id, 'name': f"{player.first_name} {player.last_name}", 'first': player.first_name.lower(), 'last': player.last_name.lower(),
-                              'position': player.position, 'team': player.current_team.abbreviation if player.current_team else 'FA', 'cap_hit': cap_hit_obj.cap_hit, 'effective_cap_hit': effective,
-                              'has_nmc': cap_hit_obj.has_nmc, 'has_ntc': cap_hit_obj.has_ntc, 'has_modified_ntc': cap_hit_obj.has_modified_ntc, 'ntc_teams_can_block': cap_hit_obj.ntc_teams_can_block,})
-                break
-    trie_data = json.dumps(all_players_for_trie)
+    
     context = {
         'team': team,
         'forwards': forwards,
@@ -286,7 +268,6 @@ def team_overview(request, abbreviation):
         'cap_penalties': cap_penalties,
         'cap_penalties_total':cap_penalties_total,
         'calculator_data': calculator_data,
-        'trie_data': trie_data,
     }
 
     return render(request, 'caps/team_overview.html', context)
@@ -490,3 +471,39 @@ def api_player_search(request):
     results.sort(key=lambda x: x['cap_hit'], reverse=True)
 
     return JsonResponse({'results': results[:10]})
+
+def api_trie_data(request):
+    exclude_team = request.GET.get('exclude_team', '').strip().upper()
+    current_season = '2025-26'
+
+    all_players = []
+    all_players_qs = Player.objects.select_related('current_team').prefetch_related('contracts__cap_hits', 'contracts__retained_salaries').all()
+
+    for player in all_players_qs:
+        if exclude_team and player.current_team and player.current_team.abbreviation == exclude_team:
+            continue
+
+        for contract in player.contracts.filter(status__in=['active', 'future']):
+            cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
+            if cap_hit_obj:
+                retained = contract.retained_salaries.first()
+                retained_amount = retained.amount if retained else 0
+                effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
+
+                all_players.append({
+                    'id': player.id,
+                    'name': f"{player.first_name} {player.last_name}",
+                    'first': player.first_name.lower(),
+                    'last': player.last_name.lower(),
+                    'position': player.position,
+                    'team': player.current_team.abbreviation if player.current_team else 'FA',
+                    'cap_hit': cap_hit_obj.cap_hit,
+                    'effective_cap_hit': effective,
+                    'has_nmc': cap_hit_obj.has_nmc,
+                    'has_ntc': cap_hit_obj.has_ntc,
+                    'has_modified_ntc': cap_hit_obj.has_modified_ntc,
+                    'ntc_teams_can_block': cap_hit_obj.ntc_teams_can_block,
+                })
+                break
+
+    return JsonResponse({'players': all_players})

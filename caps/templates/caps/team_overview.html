@@ -1801,8 +1801,9 @@
 
         // So here I realized when starting to do the search how it probably is just way faster to use a trie to access our players, than to be making a bunch of api calls with an endpoint
         // So we should just be able to access our players essentially instantly with the trie
+        // Now background loads so we load the info from our database, get to page, while on the page it starts loading the trie
+        // So trie should be ready for cap calculator mode when most users click it unless they're going to the page looking to do something really specific
 
-        const ALL_PLAYERS = JSON.parse('{{ trie_data|escapejs }}')
         
         class TrieNode {
             constructor() {
@@ -1841,18 +1842,32 @@
 
         // Build the trie
         const playerTrie = new Trie();
-        for (let i = 0; i < ALL_PLAYERS.length; i++) {
-            const p = ALL_PLAYERS[i];
-            // Index by first, last, first+last names
-            playerTrie.insert(p.first, i)
-            playerTrie.insert(p.last, i)
-            playerTrie.insert(p.first + ' ' + p.last, i)
-        }
+        let ALL_PLAYERS = [];
+        let trieReady = false;
+
+        // Background load trie data
+        fetch('/api/trie-data/?exclude_team=' + TEAM_ABBR)
+            .then(resp => resp.json())
+            .then(data => {
+                ALL_PLAYERS = data.players;
+                for (let i = 0; i < ALL_PLAYERS.length; i++) {
+                    const p = ALL_PLAYERS[i];
+                    playerTrie.insert(p.first, i);
+                    playerTrie.insert(p.last, i);
+                    playerTrie.insert(p.first + ' ' + p.last, i);
+                }
+                trieReady = true;
+            });
 
         const searchInput = document.getElementById('calc-search-input');
         const searchResults = document.getElementById('calc-search-results');
 
         searchInput.addEventListener('input', function() {
+            if (!trieReady) {
+                searchResults.innerHTML = '<div class="calc-search-loading">Loading player data...</div>';
+                searchResults.classList.add('visible');
+                return;
+}
             const query = this.value.trim();
 
             if (query.length < 1) {
