@@ -32,7 +32,11 @@ def home(request):
 
 def team_overview(request, abbreviation):
     team = get_object_or_404(Team, abbreviation=abbreviation.upper())
-    players = team.players.all().order_by('last_name')
+    # Prefetch contracts, cap hits, and retained salaries in bulk instead of per-player queries
+    players = team.players.prefetch_related(
+        'contracts__cap_hits',
+        'contracts__retained_salaries',
+    ).all().order_by('last_name')
 
     display_seasons = [ '2025-26', '2026-27', '2027-28', '2028-29', '2029-30', '2030-31']
 
@@ -45,12 +49,13 @@ def team_overview(request, abbreviation):
     ltir_pool = 0
 
     retained_cap_totals = {season: 0 for season in display_seasons}
-    for retained in team.retained_contracts.all():
+    for retained in team.retained_contracts.select_related('contract__player__current_team').prefetch_related('contract__cap_hits').all():
         contract = retained.contract
         if contract.status == 'active' and contract.player.current_team != team:
+            # Use prefetched cap_hits instead of .filter() queries
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
             for season in display_seasons:
-                cap_hit = contract.cap_hits.filter(season=season).first()
-                if cap_hit:
+                if season in cap_hits_by_season:
                     retained_cap_totals[season] += retained.amount
                     season_totals[season] += retained.amount
                 
@@ -65,16 +70,23 @@ def team_overview(request, abbreviation):
         player_birth_date = None
         remaining_salaries = []
 
+        # Use prefetched contracts — filter in Python instead of hitting DB
+        for contract in player.contracts.all():
+            if contract.status not in ('active', 'future'):
+                continue
 
-        for contract in player.contracts.filter(status__in=['active', 'future']):
-            retained = contract.retained_salaries.first()
+            retained = None
+            for rs in contract.retained_salaries.all():
+                retained = rs
+                break
             
-            if retained:
-                retained_amount = retained.amount
-            else:
-                retained_amount = 0
+            retained_amount = retained.amount if retained else 0
+
+            # Use prefetched cap_hits — build a lookup dict instead of per-season queries
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
+
             for season in display_seasons:
-                cap_hit = contract.cap_hits.filter(season=season).first()
+                cap_hit = cap_hits_by_season.get(season)
                 if cap_hit:
                     effective_cap_hit = calculate_effective_cap_hit(cap_hit, retained_amount, season)
 
@@ -119,7 +131,8 @@ def team_overview(request, abbreviation):
     
     retained_contracts = []
     
-    for retained in team.retained_contracts.all():
+    # Already fetched above with prefetch, reuse the queryset
+    for retained in team.retained_contracts.select_related('contract__player__current_team').all():
         contract = retained.contract
 
         if contract.status == 'active' and contract.player.current_team != team:
@@ -132,21 +145,24 @@ def team_overview(request, abbreviation):
     
     bought_out_contracts = []
 
-    for contract in Contract.objects.filter(status='bought_out'):
+    for contract in Contract.objects.filter(status='bought_out').select_related('buyout_team', 'signing_team', 'player').prefetch_related('cap_hits', 'retained_salaries__retaining_team'):
         responsible_team = contract.buyout_team if contract.buyout_team else contract.signing_team
 
-
-        # Oliver Ekman Larsson's Arizona/Utah contract was 12% retained, then traded to VAN and bought out. so they're on the hook for some
-        # Pretty sure this is the only contract in the league like that
-        retained = contract.retained_salaries.first()
+        # Use prefetched retained_salaries
+        retained = None
+        for rs in contract.retained_salaries.all():
+            retained = rs
+            break
 
         is_buyout_team = responsible_team == team
-        is_retaining_team = (retained and retained.retaining_team ==team)
+        is_retaining_team = (retained and retained.retaining_team == team)
 
         if is_buyout_team or is_retaining_team:
+            # Use prefetched cap_hits
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
             buyout_seasons = {}
             for season in display_seasons:
-                cap_hit_obj = contract.cap_hits.filter(season=season).first()
+                cap_hit_obj = cap_hits_by_season.get(season)
                 if cap_hit_obj:
                     full_buyout_cap = cap_hit_obj.cap_hit
 
@@ -241,11 +257,6 @@ def team_overview(request, abbreviation):
 
     calculator_data = json.dumps({'players': calc_players, 'cap_ceiling': cap_ceiling, 'current_cap': current_cap, 'ltir_pool': ltir_pool, 'dead_cap': calc_dead_cap})
 
-    # Build json with all players for our client side trie
-    # Had to change to background loading cuz the trie was taking 10-15s to load each team's page which is trash
-    
-
-    
     context = {
         'team': team,
         'forwards': forwards,
@@ -275,7 +286,10 @@ def team_overview(request, abbreviation):
 
 def team_detail(request, abbreviation, season=None):
     team = get_object_or_404(Team, abbreviation=abbreviation.upper())
-    players = team.players.all().order_by('last_name')
+    players = team.players.prefetch_related(
+        'contracts__cap_hits',
+        'contracts__retained_salaries',
+    ).all().order_by('last_name')
     
     available_seasons = [
         '2025-26', '2026-27', '2027-28', '2028-29', '2029-30', '2030-31', '2031-32', '2032-33',
@@ -292,12 +306,12 @@ def team_detail(request, abbreviation, season=None):
     
     retained_contracts = []
 
-    for retained in team.retained_contracts.all():
+    for retained in team.retained_contracts.select_related('contract__player__current_team').prefetch_related('contract__cap_hits').all():
         contract = retained.contract
         if contract.status == 'active' and contract.player.current_team != team:
 
-            cap_hit = contract.cap_hits.filter(season=current_season).first()
-            if cap_hit:
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
+            if current_season in cap_hits_by_season:
                 total_cap += retained.amount
 
                 retained_contracts.append({
@@ -308,19 +322,20 @@ def team_detail(request, abbreviation, season=None):
 
     bought_out_contracts = []
 
-    for contract in Contract.objects.filter(status='bought_out'):
+    for contract in Contract.objects.filter(status='bought_out').select_related('buyout_team', 'signing_team', 'player').prefetch_related('cap_hits', 'retained_salaries__retaining_team'):
         responsible_team = contract.buyout_team if contract.buyout_team else contract.signing_team
 
-
-        # Oliver Ekman Larsson's Arizona/Utah contract was 12% retained, then traded to VAN and bought out. so they're on the hook for some
-        # Pretty sure this is the only contract in the league like that
-        retained = contract.retained_salaries.first()
+        retained = None
+        for rs in contract.retained_salaries.all():
+            retained = rs
+            break
 
         is_buyout_team = responsible_team == team
-        is_retaining_team = (retained and retained.retaining_team ==team)
+        is_retaining_team = (retained and retained.retaining_team == team)
 
         if is_buyout_team or is_retaining_team:
-                cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
+                cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
+                cap_hit_obj = cap_hits_by_season.get(current_season)
                 if cap_hit_obj:
                     full_buyout_cap = cap_hit_obj.cap_hit
 
@@ -351,15 +366,19 @@ def team_detail(request, abbreviation, season=None):
         effective_cap_hit = 0
         retained_amount = 0
 
-        for contract in player.contracts.filter(status__in=['active', 'future']):
-            cap_hit = contract.cap_hits.filter(season=current_season).first()
+        for contract in player.contracts.all():
+            if contract.status not in ('active', 'future'):
+                continue
+
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
+            cap_hit = cap_hits_by_season.get(current_season)
             if cap_hit:
                 contract_with_cap_hit = contract
-                retained = contract.retained_salaries.first()
-                if retained:
-                    retained_amount = retained.amount
-                else:
-                    retained_amount = 0
+                retained = None
+                for rs in contract.retained_salaries.all():
+                    retained = rs
+                    break
+                retained_amount = retained.amount if retained else 0
                 effective_cap_hit = calculate_effective_cap_hit(cap_hit, retained_amount, current_season)
                 break
 
@@ -477,16 +496,25 @@ def api_trie_data(request):
     current_season = '2025-26'
 
     all_players = []
-    all_players_qs = Player.objects.select_related('current_team').prefetch_related('contracts__cap_hits', 'contracts__retained_salaries').all()
+    all_players_qs = Player.objects.select_related('current_team').prefetch_related(
+        'contracts__cap_hits', 'contracts__retained_salaries'
+    ).all()
 
     for player in all_players_qs:
         if exclude_team and player.current_team and player.current_team.abbreviation == exclude_team:
             continue
 
-        for contract in player.contracts.filter(status__in=['active', 'future']):
-            cap_hit_obj = contract.cap_hits.filter(season=current_season).first()
+        for contract in player.contracts.all():
+            if contract.status not in ('active', 'future'):
+                continue
+
+            cap_hits_by_season = {ch.season: ch for ch in contract.cap_hits.all()}
+            cap_hit_obj = cap_hits_by_season.get(current_season)
             if cap_hit_obj:
-                retained = contract.retained_salaries.first()
+                retained = None
+                for rs in contract.retained_salaries.all():
+                    retained = rs
+                    break
                 retained_amount = retained.amount if retained else 0
                 effective = calculate_effective_cap_hit(cap_hit_obj, retained_amount, current_season)
 
