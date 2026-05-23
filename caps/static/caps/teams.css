@@ -1,4 +1,4 @@
-/* NHL team color definitions — RGB components used with rgb()/rgba() */
+/* NHL team color definitions */
 .team-ANA { --tc: 252,76,2; }
 .team-BOS { --tc: 255,184,28; }
 .team-BUF { --tc: 252,181,20; }
