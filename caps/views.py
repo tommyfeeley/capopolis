@@ -1,8 +1,9 @@
 import json
+from datetime import date
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
-from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
+from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty, DraftPick
 
 # Create your views here.
 
@@ -38,7 +39,7 @@ def team_overview(request, abbreviation):
         'contracts__retained_salaries',
     ).all().order_by('last_name')
 
-    display_seasons = [ '2025-26', '2026-27', '2027-28', '2028-29', '2029-30', '2030-31']
+    display_seasons = ['2025-26', '2026-27', '2027-28', '2028-29', '2029-30', '2030-31']
 
     forwards = []
     defensemen = []
@@ -111,6 +112,24 @@ def team_overview(request, abbreviation):
             current_season_data = player_seasons.get('2025-26')
             current_roster_status = current_season_data.get('roster_status', 'active') if current_season_data else 'active'
 
+            age = None
+            if player_birth_date:
+                today = date.today()
+                age = today.year - player_birth_date.year
+                if (today.month, today.day) < (player_birth_date.month, player_birth_date.day):
+                    age -= 1
+
+            first_fa_season = None
+            extends_beyond = False
+            if contract_end:
+                for s in display_seasons:
+                    if s > contract_end:
+                        first_fa_season = s
+                        break
+                extends_beyond = contract_end > display_seasons[-1]
+
+            ch = current_season_data.get('cab_hit_obj') if current_season_data else None
+
             player_data = {
                 'player': player,
                 'seasons': player_seasons,
@@ -119,6 +138,13 @@ def team_overview(request, abbreviation):
                 'birth_date': player_birth_date,
                 'remaining_salaries': remaining_salaries,
                 'current_roster_status': current_roster_status,
+                'age': age,
+                'first_fa_season': first_fa_season,
+                'extends_beyond': extends_beyond,
+                'has_nmc': ch.has_nmc if ch else False,
+                'has_ntc': ch.has_ntc if ch else False,
+                'has_modified_ntc': ch.has_modified_ntc if ch else False,
+                'ntc_teams_can_block': ch.ntc_teams_can_block if ch else None,
             }
 
             if player.position in ['C', 'LW', 'RW']:
@@ -257,6 +283,25 @@ def team_overview(request, abbreviation):
 
     calculator_data = json.dumps({'players': calc_players, 'cap_ceiling': cap_ceiling, 'current_cap': current_cap, 'ltir_pool': ltir_pool, 'dead_cap': calc_dead_cap})
 
+    # Draft picks — next 3 draft years
+    current_year = date.today().year
+    draft_years = [current_year, current_year + 1, current_year + 2]
+
+    owned_picks_qs = DraftPick.objects.filter(
+        current_team=team, year__in=draft_years
+    ).select_related('original_team').order_by('year', 'round')
+
+    sent_picks_qs = DraftPick.objects.filter(
+        original_team=team, year__in=draft_years
+    ).exclude(current_team=team).select_related('current_team').order_by('year', 'round')
+
+    # {year: {round: {'owned': [...], 'sent': [...]}}}
+    pick_grid = {year: {r: {'owned': [], 'sent': []} for r in range(1, 8)} for year in draft_years}
+    for pick in owned_picks_qs:
+        pick_grid[pick.year][pick.round]['owned'].append(pick)
+    for pick in sent_picks_qs:
+        pick_grid[pick.year][pick.round]['sent'].append(pick)
+
     context = {
         'team': team,
         'forwards': forwards,
@@ -279,6 +324,9 @@ def team_overview(request, abbreviation):
         'cap_penalties': cap_penalties,
         'cap_penalties_total':cap_penalties_total,
         'calculator_data': calculator_data,
+        'draft_years': draft_years,
+        'pick_grid': pick_grid,
+        'draft_rounds': range(1, 8),
     }
 
     return render(request, 'caps/team_overview.html', context)
@@ -415,7 +463,8 @@ def team_detail(request, abbreviation, season=None):
     defensemen.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
     goalies.sort(key=lambda x: x['cap_hit'].cap_hit, reverse=True)
 
-    cap_ceiling = 95500000
+    cap_ceilings = {'2025-26': 95500000}
+    cap_ceiling = cap_ceilings.get(current_season, 104000000)
     cap_space = cap_ceiling - total_cap + ltir_pool
 
     active_cap = total_cap - ltir_pool
@@ -423,7 +472,15 @@ def team_detail(request, abbreviation, season=None):
     active_cap_pct = (active_cap / cap_ceiling) * 100 if cap_ceiling > 0 else 0
     ltir_pct = (ltir_pool / cap_ceiling) * 100 if cap_ceiling > 0 else 0
     space_pct = (cap_space / cap_ceiling) * 100 if cap_ceiling > 0 else 0
-    
+
+    # Draft picks for the draft year matching this cap season (e.g. 2025-26 → 2026)
+    draft_year = int(current_season.split('-')[1]) + 2000 if len(current_season.split('-')[1]) == 2 else int(current_season.split('-')[1])
+    detail_pick_grid = {r: {'owned': [], 'sent': []} for r in range(1, 8)}
+    for pick in DraftPick.objects.filter(current_team=team, year=draft_year).select_related('original_team').order_by('round'):
+        detail_pick_grid[pick.round]['owned'].append(pick)
+    for pick in DraftPick.objects.filter(original_team=team, year=draft_year).exclude(current_team=team).select_related('current_team').order_by('round'):
+        detail_pick_grid[pick.round]['sent'].append(pick)
+
     context = {
         'team': team,
         'forwards': forwards,
@@ -443,7 +500,9 @@ def team_detail(request, abbreviation, season=None):
         'active_cap': active_cap,
         'cap_penalties': cap_penalties,
         'cap_penalties_total': cap_penalties_total,
-        
+        'draft_year': draft_year,
+        'detail_pick_grid': detail_pick_grid,
+        'draft_rounds': range(1, 8),
     }
 
     return render(request, 'caps/team_detail.html', context)

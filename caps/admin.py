@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty
+from .models import Team, Player, Contract, CapHit, RetainedSalary, CapPenalty, DraftPick
 # Register your models here.
 
 @admin.register(Team)
@@ -68,6 +68,14 @@ class RetainedSalaryAdmin(admin.ModelAdmin):
     list_display = ['contract', 'retaining_team', 'amount', 'retention_percentage']
     list_filter = ['retaining_team']
     search_fields = ['contract__player__first_name', 'contract__player__last_name']
+
+@admin.register(DraftPick)
+class DraftPickAdmin(admin.ModelAdmin):
+    list_display = ['year', 'round', 'original_team', 'current_team', 'is_conditional']
+    list_filter = ['year', 'round', 'original_team', 'current_team', 'is_conditional']
+    search_fields = ['original_team__name', 'original_team__abbreviation', 'current_team__name', 'current_team__abbreviation']
+    ordering = ['year', 'round', 'original_team__name']
+
 
 @admin.register(CapPenalty)
 class CapPenaltyAdmin(admin.ModelAdmin):

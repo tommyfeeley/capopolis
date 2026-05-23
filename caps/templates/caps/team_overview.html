@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'caps/teams.css' %}">
 
     <style>
         * {
@@ -182,8 +183,9 @@
         }
 
         .position {
-            color: #888;
+            color: #e8e8f0;
             font-size: 0.85rem;
+            white-space: nowrap;
         }
 
         .money {
@@ -1061,6 +1063,105 @@
             opacity: 0.35;
         }
 
+        tbody tr:nth-child(even) td {
+            background-color: rgba(0, 0, 0, 0.18);
+        }
+
+        .fa-badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+        .fa-badge.ufa { background-color: #7f1d1d; color: #fca5a5; }
+        .fa-badge.rfa { background-color: #1e3a5f; color: #93c5fd; }
+        .fa-badge.other { background-color: #3b2060; color: #c4b5fd; }
+
+        .extends-arrow {
+            color: #a78bfa;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-left: 5px;
+            cursor: help;
+            vertical-align: middle;
+        }
+
+        .clause-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background-color: #2e2e50;
+            color: #a5b4fc;
+            font-weight: 600;
+            margin-right: 2px;
+            white-space: nowrap;
+        }
+
+        .age-col { text-align: center; color: #e8e8f0; font-size: 0.85rem; }
+        .terms-col { white-space: normal; line-height: 1.6; }
+
+        .roster-table {
+            table-layout: fixed;
+        }
+        .roster-table .col-checkbox { width: 30px; }
+        .roster-table .col-player  { width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .roster-table .col-terms   { width: 110px; }
+        .roster-table .col-pos     { width: 70px; }
+        .roster-table .col-age     { width: 56px; }
+        .roster-table .col-season  { width: 122px; }
+        .roster-table .col-tools   { width: 72px; }
+
+        .draft-picks-table td, .draft-picks-table th {
+            padding: 8px 6px;
+        }
+
+        .draft-pick {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 3px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .draft-pick[class*="team-"] {
+            border: 1px solid;
+        }
+
+        .traded-pick {
+            color: #444;
+            font-size: 1rem;
+        }
+
+        .pick-sent {
+            color: #666;
+            border: 1px solid #444;
+            background-color: rgba(255,255,255,0.04);
+            font-style: italic;
+        }
+
+        .pick-cond {
+            font-size: 0.6rem;
+            opacity: 0.75;
+            margin-left: 1px;
+            vertical-align: super;
+        }
+
+        .traded-away-line {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #aaa;
+        }
+
+        .traded-away-line strong {
+            color: #e8e8f0;
+        }
+
     </style>
 
 </head>
@@ -1237,29 +1338,69 @@
     </div>
     </div>
 
+    <!-- Draft Picks -->
+    <div class="position-group">
+        <h2 class="position-header">Draft Picks</h2>
+        <table class="draft-picks-table">
+            <thead>
+                <tr>
+                    <th style="width:70px">Draft</th>
+                    {% for r in draft_rounds %}
+                    <th style="text-align:center;min-width:75px">R{{ r }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for year in draft_years %}
+                <tr>
+                    <td style="font-weight:600;font-family:'JetBrains Mono',monospace">{{ year }}</td>
+                    {% for r in draft_rounds %}
+                    {% with cell=pick_grid|get_item:year|get_item:r %}
+                    <td style="text-align:center;padding:6px 4px;vertical-align:middle">
+                        {% for pick in cell.owned %}
+                        <div style="display:inline-block;margin:1px">
+                            <span class="draft-pick team-{{ pick.original_team.abbreviation }}" title="{% if pick.is_own_pick %}{{ team.city }} {{ team.name }} own pick{% else %}Acquired from {{ pick.original_team }}{% endif %}{% if pick.is_conditional %} (Conditional{% if pick.notes %}: {{ pick.notes }}{% endif %}){% endif %}">{{ pick.original_team.abbreviation }}{% if pick.is_conditional %}<span class="pick-cond">*</span>{% endif %}</span>
+                        </div>
+                        {% endfor %}
+                        {% for pick in cell.sent %}
+                        <div style="display:inline-block;margin:1px">
+                            <span class="draft-pick pick-sent" title="Sent to {{ pick.current_team }}{% if pick.is_conditional %} (Conditional{% if pick.notes %}: {{ pick.notes }}{% endif %}){% endif %}">→{{ pick.current_team.abbreviation }}{% if pick.is_conditional %}<span class="pick-cond">*</span>{% endif %}</span>
+                        </div>
+                        {% endfor %}
+                        {% if not cell.owned and not cell.sent %}
+                            <span class="draft-pick traded-pick">–</span>
+                        {% endif %}
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <!--Forwards Section-->
     {% with group_name="forwards" %}
 
     <div class="position-group">
         <h2 class="position-header">Forwards</h2>
-        <table>
+        <table class="roster-table">
             <thead>
                 <tr>
-                    <th class="calc-checkbox-col"></th>
-                    <th>Player</th>
-                    <th>Pos</th>
+                    <th class="calc-checkbox-col col-checkbox"></th>
+                    <th class="col-player">Player</th>
+                    <th class="col-terms">Terms</th>
+                    <th class="col-pos">Pos</th>
+                    <th class="col-age" style="text-align:center">Age</th>
                     {% for season in display_seasons %}
-                    <th class="season-col">
+                    <th class="season-col col-season">
                         <span>CAP HIT</span>
                         <a href="{% url 'team_detail_season' team.abbreviation season %}">{{ season }}</a>
-                        
                     </th>
                     {% endfor %}
-                    <th style="text-align: center;">Expiry</th>
-                    <th style="text-align: center;">Tools</th>
+                    <th class="col-tools" style="text-align: center;">Tools</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for row in forwards %}
                 <tr data-calc-group="forwards" data-calc-index="{{ forloop.counter0 }}">
@@ -1267,38 +1408,38 @@
                         <input type="checkbox" class="calc-checkbox" checked data-group="forwards" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
                     </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{ row.player.position }}</td>
-
+                    <td class="terms-col">
+                        {% if row.has_nmc %}<span class="clause-badge">NMC</span>{% endif %}
+                        {% if row.has_ntc %}<span class="clause-badge">NTC</span>{% endif %}
+                        {% if row.has_modified_ntc %}<span class="clause-badge" title="Can block {{ row.ntc_teams_can_block }} teams">M-NTC{% if row.ntc_teams_can_block %}<sup>{{ row.ntc_teams_can_block }}</sup>{% endif %}</span>{% endif %}
+                    </td>
+                    <td class="position">{{ row.player.get_positions_displayed }}</td>
+                    <td class="age-col">{{ row.age }}</td>
                     {% for season in display_seasons %}
                     {% with season_data=row.seasons|get_item:season %}
-                    <td class="money {% if not season_data %}empty{% elif row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}">
+                    <td class="money{% if season_data %} {% if row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}{% elif season != row.first_fa_season %} empty{% endif %}">
                         {% if season_data %}
-                            ${{ season_data.effective_cap_hit|intcomma }}
+                            ${{ season_data.effective_cap_hit|intcomma }}{% if forloop.last and row.extends_beyond %}<span class="extends-arrow" title="Contract through {{ row.contract_end }}">→</span>{% endif %}
+                        {% elif season == row.first_fa_season %}
+                            {% if row.free_agent_type == 'UFA' %}<span class="fa-badge ufa">UFA</span>
+                            {% elif row.free_agent_type == 'RFA' %}<span class="fa-badge rfa">RFA</span>
+                            {% else %}<span class="fa-badge other">{{ row.free_agent_type }}</span>{% endif %}
                         {% endif %}
                     </td>
                     {% endwith %}
                     {% endfor %}
-
-                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
-                        {% if row.contract_end %}
-                            {{ row.free_agent_type}} {{row.contract_end}}
-                        {% endif %}
-                    </td>
                     <td>
                         <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
                     </td>
-                    <!--escapejs is for K'andre miller, the apostrophe is screwing the JS up. Should be some french last names with them too. D'Astous on tampa.-->
                 </tr>
                 {% empty %}
                 <tr>
                     <td class="calc-checkbox-col"></td>
-                    <td colspan="{{ display_seasons|length|add:4 }}">No forwards</td>
+                    <td colspan="{{ display_seasons|length|add:5 }}">No forwards</td>
                 </tr>
                 {% endfor %}
             </tbody>
-
         </table>
-
     </div>
     {% endwith %}
     <!--Defensemen section-->
@@ -1306,23 +1447,23 @@
 
     <div class="position-group">
         <h2 class="position-header">Defensemen</h2>
-        <table>
+        <table class="roster-table">
             <thead>
                 <tr>
-                    <th class="calc-checkbox-col"></th>
-                    <th>Player</th>
-                    <th>Pos</th>
+                    <th class="calc-checkbox-col col-checkbox"></th>
+                    <th class="col-player">Player</th>
+                    <th class="col-terms">Terms</th>
+                    <th class="col-pos">Pos</th>
+                    <th class="col-age" style="text-align:center">Age</th>
                     {% for season in display_seasons %}
-                    <th class="season-col">
-                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
-                        <span>Cap Hit</span>
+                    <th class="season-col col-season">
+                        <span>CAP HIT</span>
+                        <a href="{% url 'team_detail_season' team.abbreviation season %}">{{ season }}</a>
                     </th>
                     {% endfor %}
-                    <th style="text-align: center;">Expiry</th>
-                    <th style="text-align: center;">Tools</th>
+                    <th class="col-tools" style="text-align: center;">Tools</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for row in defensemen %}
                 <tr data-calc-group="defensemen" data-calc-index="{{ forloop.counter0 }}">
@@ -1330,23 +1471,26 @@
                         <input type="checkbox" class="calc-checkbox" checked data-group="defensemen" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
                     </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{ row.player.position }}</td>
-
+                    <td class="terms-col">
+                        {% if row.has_nmc %}<span class="clause-badge">NMC</span>{% endif %}
+                        {% if row.has_ntc %}<span class="clause-badge">NTC</span>{% endif %}
+                        {% if row.has_modified_ntc %}<span class="clause-badge" title="Can block {{ row.ntc_teams_can_block }} teams">M-NTC{% if row.ntc_teams_can_block %}<sup>{{ row.ntc_teams_can_block }}</sup>{% endif %}</span>{% endif %}
+                    </td>
+                    <td class="position">{{ row.player.get_positions_displayed }}</td>
+                    <td class="age-col">{{ row.age }}</td>
                     {% for season in display_seasons %}
                     {% with season_data=row.seasons|get_item:season %}
-                    <td class="money {% if not season_data %}empty{% elif row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}">
+                    <td class="money{% if season_data %} {% if row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}{% elif season != row.first_fa_season %} empty{% endif %}">
                         {% if season_data %}
-                            ${{ season_data.effective_cap_hit|intcomma }}
+                            ${{ season_data.effective_cap_hit|intcomma }}{% if forloop.last and row.extends_beyond %}<span class="extends-arrow" title="Contract through {{ row.contract_end }}">→</span>{% endif %}
+                        {% elif season == row.first_fa_season %}
+                            {% if row.free_agent_type == 'UFA' %}<span class="fa-badge ufa">UFA</span>
+                            {% elif row.free_agent_type == 'RFA' %}<span class="fa-badge rfa">RFA</span>
+                            {% else %}<span class="fa-badge other">{{ row.free_agent_type }}</span>{% endif %}
                         {% endif %}
                     </td>
                     {% endwith %}
                     {% endfor %}
-
-                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
-                        {% if row.contract_end %}
-                            {{ row.free_agent_type}} {{row.contract_end}}
-                        {% endif %}
-                    </td>
                     <td>
                         <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', '{{ row.remaining_salaries|to_json }}')">Buyout</button>
                     </td>
@@ -1354,13 +1498,11 @@
                 {% empty %}
                 <tr>
                     <td class="calc-checkbox-col"></td>
-                    <td colspan="{{ display_seasons|length|add:4 }}">No defensemen</td>
+                    <td colspan="{{ display_seasons|length|add:5 }}">No defensemen</td>
                 </tr>
                 {% endfor %}
             </tbody>
-
         </table>
-
     </div>
     {% endwith %}
     <!--Goalie section-->
@@ -1368,23 +1510,23 @@
 
     <div class="position-group">
         <h2 class="position-header">Goalies</h2>
-        <table>
+        <table class="roster-table">
             <thead>
                 <tr>
-                    <th class="calc-checkbox-col"></th>
-                    <th>Player</th>
-                    <th>Pos</th>
+                    <th class="calc-checkbox-col col-checkbox"></th>
+                    <th class="col-player">Player</th>
+                    <th class="col-terms">Terms</th>
+                    <th class="col-pos">Pos</th>
+                    <th class="col-age" style="text-align:center">Age</th>
                     {% for season in display_seasons %}
-                    <th class="season-col">
-                        <a href="{% url 'team_detail_season' team.abbreviation season}">{{ season }}</a>
-                        <span>Cap Hit</span>
+                    <th class="season-col col-season">
+                        <span>CAP HIT</span>
+                        <a href="{% url 'team_detail_season' team.abbreviation season %}">{{ season }}</a>
                     </th>
                     {% endfor %}
-                    <th style="text-align: center;">Expiry</th>
-                    <th style="text-align: center;">Tools</th>
+                    <th class="col-tools" style="text-align: center;">Tools</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for row in goalies %}
                 <tr data-calc-group="goalies" data-calc-index="{{ forloop.counter0 }}">
@@ -1392,23 +1534,26 @@
                         <input type="checkbox" class="calc-checkbox" checked data-group="goalies" data-index="{{ forloop.counter0 }}" onchange="onCalcToggle(this)">
                     </td>
                     <td class="player-name">{{ row.player.first_name}} {{row.player.last_name}}</td>
-                    <td class="position">{{ row.player.position }}</td>
-
+                    <td class="terms-col">
+                        {% if row.has_nmc %}<span class="clause-badge">NMC</span>{% endif %}
+                        {% if row.has_ntc %}<span class="clause-badge">NTC</span>{% endif %}
+                        {% if row.has_modified_ntc %}<span class="clause-badge" title="Can block {{ row.ntc_teams_can_block }} teams">M-NTC{% if row.ntc_teams_can_block %}<sup>{{ row.ntc_teams_can_block }}</sup>{% endif %}</span>{% endif %}
+                    </td>
+                    <td class="position">{{ row.player.get_positions_displayed }}</td>
+                    <td class="age-col">{{ row.age }}</td>
                     {% for season in display_seasons %}
                     {% with season_data=row.seasons|get_item:season %}
-                    <td class="money {% if not season_data %}empty{% elif row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}">
+                    <td class="money{% if season_data %} {% if row.current_roster_status == 'buried' %}buried{% elif row.current_roster_status == 'ltir' %}ltir{% elif row.current_roster_status == 'ir' %}ir{% endif %}{% elif season != row.first_fa_season %} empty{% endif %}">
                         {% if season_data %}
-                            ${{ season_data.effective_cap_hit|intcomma }}
+                            ${{ season_data.effective_cap_hit|intcomma }}{% if forloop.last and row.extends_beyond %}<span class="extends-arrow" title="Contract through {{ row.contract_end }}">→</span>{% endif %}
+                        {% elif season == row.first_fa_season %}
+                            {% if row.free_agent_type == 'UFA' %}<span class="fa-badge ufa">UFA</span>
+                            {% elif row.free_agent_type == 'RFA' %}<span class="fa-badge rfa">RFA</span>
+                            {% else %}<span class="fa-badge other">{{ row.free_agent_type }}</span>{% endif %}
                         {% endif %}
                     </td>
                     {% endwith %}
                     {% endfor %}
-
-                    <td class="expiry expiry-{{ row.free_agent_type|lower }}">
-                        {% if row.contract_end %}
-                            {{ row.free_agent_type}} {{row.contract_end}}
-                        {% endif %}
-                    </td>
                     <td>
                         <button class="buyout-btn" onclick="calculateBuyout('{{ row.player.first_name|escapejs }} {{ row.player.last_name|escapejs }}', '{{ row.birth_date|date:"Y-m-d" }}', {{ row.remaining_salaries|to_json }})">Buyout</button>
                     </td>
@@ -1416,13 +1561,11 @@
                 {% empty %}
                 <tr>
                     <td class="calc-checkbox-col"></td>
-                    <td colspan="{{ display_seasons|length|add:4 }}">No goalies</td>
+                    <td colspan="{{ display_seasons|length|add:5 }}">No goalies</td>
                 </tr>
                 {% endfor %}
             </tbody>
-
         </table>
-
     </div>
     {% endwith %}
     <!--Retained salary on contracts, up to 50% per player. Can be retained by multiple teams. New rule where has to be 70 reg season days between each retention, old double retention is fine.-->

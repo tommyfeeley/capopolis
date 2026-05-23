@@ -119,6 +119,33 @@ class RetainedSalary(models.Model):
     def __str__(self):
         return f"{self.retaining_team.abbreviation} retaining ${self.amount:} on {self.contract.player}"
     
+class DraftPick(models.Model):
+    ROUND_CHOICES = [(i, f"Round {i}") for i in range(1, 8)]
+
+    year = models.PositiveIntegerField()
+    round = models.PositiveSmallIntegerField(choices=ROUND_CHOICES)
+    original_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='original_picks')
+    current_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_picks')
+    is_conditional = models.BooleanField(default=False)
+    notes = models.TextField(blank=True, help_text="Condition details, trade notes, etc.")
+
+    class Meta:
+        unique_together = ['year', 'round', 'original_team']
+        ordering = ['year', 'round']
+
+    def __str__(self):
+        owner = self.current_team.abbreviation if self.current_team else 'Unknown'
+        orig = self.original_team.abbreviation
+        cond = ' (Cond.)' if self.is_conditional else ''
+        if owner == orig:
+            return f"{owner} {self.year} R{self.round}{cond}"
+        return f"{orig} {self.year} R{self.round} → {owner}{cond}"
+
+    @property
+    def is_own_pick(self):
+        return self.current_team_id == self.original_team_id
+
+
 class CapPenalty(models.Model):
 
     PENALTY_TYPE_CHOICES = [('bonus_carryover', 'Performance Bonus Carryover'), ('bonus_cushion', 'Performance Bonus Cushion Excess'), ('ltir_opening', 'Season Opening LTIR'),]
