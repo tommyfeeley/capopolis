@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'caps/teams.css' %}">
     <style>
         * {
             margin: 0;
@@ -135,12 +136,10 @@
         }
         
         .team-abbr {
-            color: #818cf8;
             font-size: 0.75rem;
             font-weight: 600;
             font-family: 'JetBrains Mono', 'Consolas', monospace;
             margin-left: auto;
-            background-color: rgba(99, 102, 241, 0.1);
             padding: 3px 8px;
             border-radius: 4px;
         }
@@ -199,7 +198,7 @@
                                 <li>
                                     <a href="{% url 'team_overview' team.abbreviation %}">
                                         {{ team.city }} {{ team.name }}
-                                        <span class="team-abbr">{{ team.abbreviation }}</span>
+                                        <span class="team-abbr team-{{ team.abbreviation }}">{{ team.abbreviation }}</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -214,7 +213,7 @@
                                 <li>
                                     <a href="{% url 'team_overview' team.abbreviation %}">
                                         {{ team.city }} {{ team.name }}
-                                        <span class="team-abbr">{{ team.abbreviation }}</span>
+                                        <span class="team-abbr team-{{ team.abbreviation }}">{{ team.abbreviation }}</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -235,7 +234,7 @@
                                 <li>
                                     <a href="{% url 'team_overview' team.abbreviation %}">
                                         {{ team.city }} {{ team.name }}
-                                        <span class="team-abbr">{{ team.abbreviation }}</span>
+                                        <span class="team-abbr team-{{ team.abbreviation }}">{{ team.abbreviation }}</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -250,7 +249,7 @@
                                 <li>
                                     <a href="{% url 'team_overview' team.abbreviation %}">
                                         {{ team.city }} {{ team.name }}
-                                        <span class="team-abbr">{{ team.abbreviation }}</span>
+                                        <span class="team-abbr team-{{ team.abbreviation }}">{{ team.abbreviation }}</span>
                                     </a>
                                 </li>
                             {% endif %}

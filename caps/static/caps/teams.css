@@ -1,35 +1,47 @@
-/* NHL team pick badge colors — keyed by original_team abbreviation */
-/* Uses team color for text + border, subtle tint for background */
+/* NHL team color definitions — RGB components used with rgb()/rgba() */
+.team-ANA { --tc: 252,76,2; }
+.team-BOS { --tc: 255,184,28; }
+.team-BUF { --tc: 252,181,20; }
+.team-CAR { --tc: 204,0,0; }
+.team-CBJ { --tc: 107,155,195; }
+.team-CGY { --tc: 200,16,46; }
+.team-CHI { --tc: 207,10,44; }
+.team-COL { --tc: 158,85,115; }
+.team-DAL { --tc: 0,168,119; }
+.team-DET { --tc: 206,17,38; }
+.team-EDM { --tc: 255,76,0; }
+.team-FLA { --tc: 200,16,46; }
+.team-LAK { --tc: 162,170,173; }
+.team-MIN { --tc: 166,25,46; }
+.team-MTL { --tc: 175,30,45; }
+.team-NSH { --tc: 255,184,28; }
+.team-NJD { --tc: 206,17,38; }
+.team-NYI { --tc: 244,125,48; }
+.team-NYR { --tc: 85,128,204; }
+.team-OTT { --tc: 198,146,20; }
+.team-PHI { --tc: 247,73,2; }
+.team-PIT { --tc: 255,184,28; }
+.team-SEA { --tc: 104,162,185; }
+.team-SJS { --tc: 0,168,150; }
+.team-STL { --tc: 252,181,20; }
+.team-TBL { --tc: 110,168,208; }
+.team-TOR { --tc: 74,130,196; }
+.team-UTA { --tc: 108,172,228; }
+.team-VAN { --tc: 0,132,61; }
+.team-VGK { --tc: 180,151,90; }
+.team-WSH { --tc: 200,16,46; }
+.team-WPG { --tc: 91,141,184; }
 
-.draft-pick.team-ANA { color: #FC4C02; border-color: #FC4C02; background-color: rgba(252,76,2,0.13); }
-.draft-pick.team-BOS { color: #FFB81C; border-color: #FFB81C; background-color: rgba(255,184,28,0.13); }
-.draft-pick.team-BUF { color: #FCB514; border-color: #FCB514; background-color: rgba(252,181,20,0.13); }
-.draft-pick.team-CAR { color: #CC0000; border-color: #CC0000; background-color: rgba(204,0,0,0.13); }
-.draft-pick.team-CBJ { color: #6B9BC3; border-color: #6B9BC3; background-color: rgba(107,155,195,0.13); }
-.draft-pick.team-CGY { color: #C8102E; border-color: #C8102E; background-color: rgba(200,16,46,0.13); }
-.draft-pick.team-CHI { color: #CF0A2C; border-color: #CF0A2C; background-color: rgba(207,10,44,0.13); }
-.draft-pick.team-COL { color: #9E5573; border-color: #9E5573; background-color: rgba(158,85,115,0.13); }
-.draft-pick.team-DAL { color: #00A877; border-color: #00A877; background-color: rgba(0,168,119,0.13); }
-.draft-pick.team-DET { color: #CE1126; border-color: #CE1126; background-color: rgba(206,17,38,0.13); }
-.draft-pick.team-EDM { color: #FF4C00; border-color: #FF4C00; background-color: rgba(255,76,0,0.13); }
-.draft-pick.team-FLA { color: #C8102E; border-color: #C8102E; background-color: rgba(200,16,46,0.13); }
-.draft-pick.team-LAK { color: #A2AAAD; border-color: #A2AAAD; background-color: rgba(162,170,173,0.13); }
-.draft-pick.team-MIN { color: #A6192E; border-color: #A6192E; background-color: rgba(166,25,46,0.13); }
-.draft-pick.team-MTL { color: #AF1E2D; border-color: #AF1E2D; background-color: rgba(175,30,45,0.13); }
-.draft-pick.team-NSH { color: #FFB81C; border-color: #FFB81C; background-color: rgba(255,184,28,0.13); }
-.draft-pick.team-NJD { color: #CE1126; border-color: #CE1126; background-color: rgba(206,17,38,0.13); }
-.draft-pick.team-NYI { color: #F47D30; border-color: #F47D30; background-color: rgba(244,125,48,0.13); }
-.draft-pick.team-NYR { color: #5580CC; border-color: #5580CC; background-color: rgba(85,128,204,0.13); }
-.draft-pick.team-OTT { color: #C69214; border-color: #C69214; background-color: rgba(198,146,20,0.13); }
-.draft-pick.team-PHI { color: #F74902; border-color: #F74902; background-color: rgba(247,73,2,0.13); }
-.draft-pick.team-PIT { color: #FFB81C; border-color: #FFB81C; background-color: rgba(255,184,28,0.13); }
-.draft-pick.team-SEA { color: #68A2B9; border-color: #68A2B9; background-color: rgba(104,162,185,0.13); }
-.draft-pick.team-SJS { color: #00A896; border-color: #00A896; background-color: rgba(0,168,150,0.13); }
-.draft-pick.team-STL { color: #FCB514; border-color: #FCB514; background-color: rgba(252,181,20,0.13); }
-.draft-pick.team-TBL { color: #6EA8D0; border-color: #6EA8D0; background-color: rgba(110,168,208,0.13); }
-.draft-pick.team-TOR { color: #4A82C4; border-color: #4A82C4; background-color: rgba(74,130,196,0.13); }
-.draft-pick.team-UTA { color: #6CACE4; border-color: #6CACE4; background-color: rgba(108,172,228,0.13); }
-.draft-pick.team-VAN { color: #00843D; border-color: #00843D; background-color: rgba(0,132,61,0.13); }
-.draft-pick.team-VGK { color: #B4975A; border-color: #B4975A; background-color: rgba(180,151,90,0.13); }
-.draft-pick.team-WSH { color: #C8102E; border-color: #C8102E; background-color: rgba(200,16,46,0.13); }
-.draft-pick.team-WPG { color: #5B8DB8; border-color: #5B8DB8; background-color: rgba(91,141,184,0.13); }
+/* Draft pick badges */
+.draft-pick[class*="team-"] {
+    color: rgb(var(--tc));
+    border: 1px solid rgb(var(--tc));
+    background-color: rgba(var(--tc), 0.13);
+}
+
+/* Home page team abbreviation chips */
+.team-abbr[class*="team-"] {
+    color: rgb(var(--tc));
+    border: 1px solid rgb(var(--tc));
+    background-color: rgba(var(--tc), 0.13);
+}
